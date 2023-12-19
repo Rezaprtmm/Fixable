@@ -81,6 +81,20 @@ async function activeUser() {
   }
 }
 
+async function getUserData(username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(accountCollection);
+  const currentUser = await session.find({ _id: username }).toArray();
+  const dataCollect = [];
+  if (currentUser.length != 0) {
+    dataCollect.push(currentUser[currentUser.length - 1].fullName, currentUser[currentUser.length - 1].email);
+    return dataCollect;
+  } else {
+    return false;
+  }
+}
+
 async function signIn(userCred, userPassword) {
   await client.connect();
   const db = client.db(databaseName);
@@ -296,6 +310,12 @@ app.post("/signin", async (req, res) => {
 app.post("/session", async (req, res) => {
   const { request } = req.body;
   let reqData = await activeUser();
+  res.json(reqData);
+});
+
+app.post("/getuserdata", async (req, res) => {
+  const { username } = req.body;
+  let reqData = await getUserData(username);
   res.json(reqData);
 });
 
