@@ -4,68 +4,41 @@ const app = express();
 const cors = require("cors");
 const { OAuth2Client } = require("google-auth-library");
 const { MongoClient } = require("mongodb");
-const { sign } = require("crypto");
 
 // URL Koneksi MongoDB
 const uri = "mongodb://localhost:27017"; // Ubah sesuai dengan URL MongoDB Anda
 const databaseName = "bengkel-it";
 const accountCollection = "account";
-const accountSession = "session";
+const reserveCollection = "reservation";
 const port = 3001;
 
 // Buat instance MongoClient
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-async function insertSignUp(fullName, userName, email, password) {
+async function insertSignUp(fullName, userName, email, nim, password) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(accountCollection);
-  const sessions = db.collection(accountSession);
-  const databasesList = await client.db().admin().listDatabases();
-  const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
+  // const databasesList = await client.db().admin().listDatabases();
+  // const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
   const collections = await db.listCollections().toArray();
   const collectionExists = collections.some((collection) => collection.name === accountCollection);
-  const sessionExists = collections.some((collection) => collection.name === accountSession);
 
-  if (databaseExists) {
-    console.log(`Database '${databaseName}' sudah ada.`);
-  } else {
-    console.log(`Database '${databaseName}' belum ada. Membuat database baru...`);
-    console.log(`Database '${databaseName}' berhasil dibuat.`);
-  }
-  if (collectionExists) {
-    console.log(`Koleksi '${accountCollection}' sudah ada dalam basis data '${databaseName}'.`);
-  } else {
-    console.log(`Koleksi '${accountCollection}' belum ada dalam basis data '${databaseName}'. Membuat koleksi baru...`);
+  if (!collectionExists) {
     await db.createCollection(accountCollection);
-    console.log(`Koleksi '${accountCollection}' berhasil dibuat.`);
-  }
-  if (sessionExists) {
-    console.log(`Koleksi '${accountSession}' sudah ada dalam basis data '${databaseName}'.`);
-  } else {
-    console.log(`Koleksi '${accountSession}' belum ada dalam basis data '${databaseName}'. Membuat koleksi baru...`);
-    await db.createCollection(accountSession);
-    console.log(`Koleksi '${accountSession}' berhasil dibuat.`);
   }
 
-  const data = await collection.find({ _id: userName }).toArray();
-  if (data.length == 0) {
-    const currentUser = await collection.find({}).toArray();
-    const dataToInsert = [{ _id: userName, fullName: fullName, email: email, password: password, active: true }];
-
+  const idCheck = await collection.find({ _id: nim }).toArray();
+  const unameCheck = await collection.find({ username: userName }).toArray();
+  const emailCheck = await collection.find({ email: email }).toArray();
+  if (idCheck.length == 0 && emailCheck == 0 && unameCheck == 0) {
+    const dataToInsert = [{ _id: nim, fullName: fullName, username: userName, email: email, password: password, active: true }];
     const result = await collection.insertMany(dataToInsert);
-    console.log(`${result.insertedCount} dokumen berhasil dimasukkan ke dalam koleksi '${accountCollection}'.`);
-
     return true;
+  } else if (idCheck.length != 0) {
+    return "nim-exist";
   } else {
-    if (password != data[0].password) {
-      return false;
-    } else {
-      const sessionInsert = [{ email: email, username: data[0]._id }];
-      const setSession = await sessions.insertMany(sessionInsert);
-      console.log(`${setSession.insertedCount} dokumen berhasil dimasukkan ke dalam koleksi '${accountSession}'.`);
-      return true;
-    }
+    return "data-exist";
   }
 }
 
@@ -75,20 +48,52 @@ async function activeUser() {
   const session = db.collection(accountCollection);
   const currentUser = await session.find({ active: true }).toArray();
   if (currentUser.length != 0) {
-    return currentUser[currentUser.length - 1]._id;
+    return currentUser[currentUser.length - 1].username;
   } else {
     return false;
   }
+}
+
+async function reservation(nim, fullname, email, major, phoneNumber) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection(reserveCollection);
+  const collections = await db.listCollections().toArray();
+  const collectionExists = collections.some((collection) => collection.name === reserveCollection);
+  const totalForm = await collection.find({}).toArray();
+  const formId = `${nim}${totalForm.length + 1}`;
+
+  if (!collectionExists) {
+    await db.createCollection(reserveCollection);
+  }
+
+  const dataToInsert = [{ _id: formId, status: "incomplete", fullname: fullname, email: email, major: major, phonenumber: phoneNumber }];
+  const result = await collection.insertMany(dataToInsert);
+  return true;
+}
+
+async function services(category, problem, details) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection(reserveCollection);
+  const getIncomplete = await collection.find({ status: "incomplete" }).toArray();
+  const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
+
+  const updateDocument = {
+    $set: { category: category, problems: problem, details: details },
+  };
+  const dataToInsert = await collection.updateOne(filter, updateDocument);
+  return true;
 }
 
 async function getUserData(username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(accountCollection);
-  const currentUser = await session.find({ _id: username }).toArray();
+  const currentUser = await session.find({ username: username }).toArray();
   const dataCollect = [];
   if (currentUser.length != 0) {
-    dataCollect.push(currentUser[currentUser.length - 1].fullName, currentUser[currentUser.length - 1].email);
+    dataCollect.push(currentUser[currentUser.length - 1].fullName, currentUser[currentUser.length - 1].email, currentUser[currentUser.length - 1]._id);
     return dataCollect;
   } else {
     return false;
@@ -120,8 +125,8 @@ async function signIn(userCred, userPassword) {
       return false;
     }
   } else {
-    const currentUser = await session.find({ _id: userCred }).toArray();
-    const filter = { _id: userCred };
+    const currentUser = await session.find({ username: userCred }).toArray();
+    const filter = { username: userCred };
 
     const updateDocument = {
       $set: { active: true },
@@ -289,13 +294,11 @@ app.use(
 );
 
 app.post("/signup", async (req, res) => {
-  const { fullName, userName, email, password } = req.body;
-  console.log(fullName, userName, email, password);
-
+  const { fullName, userName, email, nim, password } = req.body;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (emailPattern.test(email)) {
-    const insert = await insertSignUp(fullName, userName, email, password);
-    res.send(insert);
+    const insert = await insertSignUp(fullName, userName, email, nim, password);
+    res.json(insert);
   } else {
     res.send(false);
   }
@@ -309,8 +312,23 @@ app.post("/signin", async (req, res) => {
 
 app.post("/session", async (req, res) => {
   const { request } = req.body;
+  if (request == "reserve") {
+    console.log("Masuk");
+  }
   let reqData = await activeUser();
   res.json(reqData);
+});
+
+app.post("/reserve", async (req, res) => {
+  const { fullname, email, major, phoneNumber, nim } = req.body;
+  let inputReserve = await reservation(nim, fullname, email, major, phoneNumber);
+  res.send(inputReserve);
+});
+
+app.post("/services", async (req, res) => {
+  const { category, problem, details } = req.body;
+  let inputServices = await services(category, problem, details);
+  res.send(inputServices);
 });
 
 app.post("/getuserdata", async (req, res) => {

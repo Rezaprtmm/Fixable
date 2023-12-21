@@ -12,6 +12,7 @@ export default function SignUp() {
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
+  const [nim, setNim] = useState("");
   const [password, setPassword] = useState("");
 
   const handleFullName = (event: { target: { value: any } }) => {
@@ -19,6 +20,9 @@ export default function SignUp() {
   };
   const handleUserName = (event: { target: { value: any } }) => {
     setUserName(event.target.value);
+  };
+  const handleNIM = (event: { target: { value: any } }) => {
+    setNim(event.target.value);
   };
   const handleEmail = (event: { target: { value: any } }) => {
     setEmail(event.target.value);
@@ -34,12 +38,16 @@ export default function SignUp() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       mode: "cors",
-      body: JSON.stringify({ fullName, userName, email, password }),
+      body: JSON.stringify({ fullName, userName, email, nim, password }),
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data) {
+        if (data == true) {
           window.location.href = "http://localhost:3000/discover";
+        } else if (data == "nim-exist") {
+          alert("NIM sudah terdaftar");
+        } else if (data == "data-exist") {
+          alert("Username atau email sudah terdaftar");
         } else {
           alert("Format email salah");
         }
@@ -67,6 +75,7 @@ export default function SignUp() {
           <div className="flex flex-col mt-[24px] w-[51vh]">
             <Label name="Fullname" type="text" icon={<IconUsername />} onChange={handleFullName} />
             <Label name="Username" type="text" icon={<IconUsername />} className="mt-[16px]" onChange={handleUserName} />
+            <Label name="NIM" type="text" icon={<IconUsername />} className="mt-[16px]" onChange={handleNIM} />
             <Label name="Email" type="text" icon={<IconEmail />} className="mt-[16px]" onChange={handleEmail} />
             <Label name="Password" type="password" icon={<IconPassword />} className="mt-[16px]" onChange={handlePassword} />
             <button className="w-full bg-blue-main py-[17px] rounded-[10px] text-[#ffff] text-[16px] font-poppins font-normal leading-[170%] mt-[16px]" onClick={handleSubmit}>
