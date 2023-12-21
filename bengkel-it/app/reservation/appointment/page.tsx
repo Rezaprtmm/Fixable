@@ -9,6 +9,9 @@ import ButtonDay from "@/components/ButtonDay/Index";
 
 export default function Appointment() {
 	const [activeDay, isActiveDay] = useState<string>("Monday");
+	const [meetType, setMeetType] = useState("");
+	const [timePref, setTimePref] = useState("");
+
 	const [username, setUserName] = useState("username");
 	const getUsername = async (userName: any) => {
 		setUserName(userName);
@@ -18,6 +21,43 @@ export default function Appointment() {
 			isActiveDay(selectedDay);
 		}
 	};
+
+	const handleMeet = (setMeet: string) => {
+		setMeetType(setMeet);
+	};
+
+	const handleTime = (setTime: string) => {
+		setTimePref(setTime);
+	};
+
+	const handleSubmit = async (e: { preventDefault: () => void }) => {
+		e.preventDefault();
+
+		fetch("http://localhost:3001/appoint", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			mode: "cors",
+			body: JSON.stringify({ activeDay, meetType, timePref, username }),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				if (data) {
+					window.location.href = "http://localhost:3000/reservation/success-reservation";
+				} else {
+					alert("Gagal mengunggah data");
+				}
+			})
+			.catch((error) => {
+				console.error("Terjadi kesalahan:", error);
+			});
+	};
+
+	const handleBack = async (e: { preventDefault: () => void }) => {
+		e.preventDefault();
+
+		window.location.href = "http://localhost:3000/reservation/services";
+	};
+
 	return (
 		<div className="w-full overflow-hidden">
 			<Sidebar activeMenu="reservation" userName={getUsername} />
@@ -60,34 +100,34 @@ export default function Appointment() {
 							</div>
 							<div className="flex flex-col mt-[24px] gap-[16px]">
 								{/* Meeting type */}
-								<LabelButtonMeeting title="Meeting type" />
+								<LabelButtonMeeting title="Meeting type" setMeet={handleMeet} />
 
 								{/* Time preference */}
-								<LabelButtonTime title="Time preference" />
+								<LabelButtonTime title="Time preference" setTime={handleTime} />
 
-								{/* Problem details */}
+								{/* Day you are available */}
 								<div className="flex flex-col">
 									<label htmlFor="" className="text-black font-poppins text-[16px] font-normal leading-[170%]">
-										Problem details
+										Day you are available
 									</label>
 									<div className="flex flex-row gap-[16px] mt-[16px]">
 										<ButtonDay day="Monday" type="button" active={activeDay === "Monday"} onClick={handleDaySelect} />
 										<ButtonDay day="Tuesday" type="button" active={activeDay === "Tuesday"} onClick={handleDaySelect} />
 										<ButtonDay day="Wednesday" type="button" active={activeDay === "Wednesday"} onClick={handleDaySelect} />
 										<ButtonDay day="Thursday" type="button" active={activeDay === "Thursday"} onClick={handleDaySelect} />
-										<ButtonDay day="Friday" type="button" active={activeDay === "Fiday"} onClick={handleDaySelect} />
+										<ButtonDay day="Friday" type="button" active={activeDay === "Friday"} onClick={handleDaySelect} />
 									</div>
 								</div>
 							</div>
 						</div>
 						<div className="flex flex-row gap-[16px] items-center justify-end">
-							<button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]">
+							<button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]" onClick={handleBack}>
 								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
 									<path d="M14.5 17.5L9.5 12.5L14.5 7.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 								</svg>
 								Back
 							</button>
-							<button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]">
+							<button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]" onClick={handleSubmit}>
 								Next{" "}
 								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
 									<path d="M9.5 17.5L14.5 12.5L9.5 7.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

@@ -11,7 +11,7 @@ export default function Discover() {
 	const request = "halo";
 
 	window.onload = async function () {
-		const fetchData = await axios.post("http://localhost:3001/session", { request });
+		const fetchData = await axios.post("http://localhost:3001/session", { request, username });
 		setUserName(fetchData.data);
 	};
 
