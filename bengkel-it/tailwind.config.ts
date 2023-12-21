@@ -59,6 +59,11 @@ const config: Config = {
       boxShadow: {
         input: " 0px 0px 2px 0px rgba(0, 0, 0, 0.25);",
         sidebar: "4px 0px 20px 0px rgba(0, 0, 0, 0.05)",
+        payment:
+          "0px 11px 24px 0px rgba(0, 0, 0, 0.15), 0px 43px 43px 0px rgba(0, 0, 0, 0.13), 0px 97px 58px 0px rgba(0, 0, 0, 0.08), 0px 172px 69px 0px rgba(0, 0, 0, 0.02), 0px 268px 75px 0px rgba(0, 0, 0, 0.00)",
+      },
+      backgroundImage: {
+        va: "url('/svgs/bg-payment.svg')",
       },
     },
   },
