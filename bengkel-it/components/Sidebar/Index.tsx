@@ -56,7 +56,7 @@ export default function Sidebar(props: SidebarProps) {
           <LinkSidebar title="Reservation" href="/reservation/member" icon={<IconReservation />} active={activeMenu === "reservation"} />
           <LinkSidebar title="Review" href="/review/validation" icon={<IconReview />} active={activeMenu === "review"} />
           <LinkSidebar title="History" href="/history/service-history" icon={<IconHistory />} active={activeMenu === "history"} />
-          <LinkSidebar title="Payment" href="/" icon={<IconPayment />} active={activeMenu === "payment"} />
+          <LinkSidebar title="Payment" href="/payment" icon={<IconPayment />} active={activeMenu === "payment"} />
         </div>
       </div>
     </aside>

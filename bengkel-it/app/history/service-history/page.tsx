@@ -9,7 +9,7 @@ import TableHistorySer from "@/components/TableHistorySer/Index";
 import ButtonHistory from "@/components/ButtonHistory/Index";
 
 export default function ServiceHistory() {
-  const [username, setUserName] = useState("username");
+  const [username, setUserName] = useState("");
   const getUsername = async (userName: any) => {
     setUserName(userName);
   };
@@ -31,7 +31,7 @@ export default function ServiceHistory() {
           </div>
         </div>
         <div>
-          <TableHistorySer />
+          <TableHistorySer getUsername={username} />
         </div>
       </div>
     </div>

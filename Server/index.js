@@ -54,6 +54,31 @@ async function activeUser() {
   }
 }
 
+async function checkReserve(reserveId) {
+  console.log(reserveId);
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const currentUser = await session.find({ _id: reserveId.trim() }).toArray();
+  if (currentUser.length != 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+async function activeUser1() {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(accountCollection);
+  const currentUser = await session.find({ active: true }).toArray();
+  if (currentUser.length != 0) {
+    return currentUser[0].username;
+  } else {
+    return false;
+  }
+}
+
 async function removeIncompleteForm(username) {
   await client.connect();
   const db = client.db(databaseName);
@@ -75,20 +100,45 @@ async function reservation(nim, fullname, email, major, phoneNumber, username) {
     await db.createCollection(reserveCollection);
   }
 
-  const dataToInsert = [{ _id: formId, status: "incomplete", fullname: fullname, username: username, email: email, major: major, phonenumber: phoneNumber, category: null, problems: null, details: null, meetType: null, timePref: null, activeDay: null }];
+  const dataToInsert = [
+    {
+      _id: formId,
+      uniquecode: null,
+      status: "incomplete",
+      datecreated: null,
+      datesolved: "-",
+      fullname: fullname,
+      username: username,
+      email: email,
+      major: major,
+      phonenumber: phoneNumber,
+      category: null,
+      problems: null,
+      details: null,
+      meetType: null,
+      timePref: null,
+      activeDay: null,
+      ispaid: false,
+    },
+  ];
+
   const result = await collection.insertMany(dataToInsert);
   return true;
 }
 
 async function services(category, problem, details, username) {
   await client.connect();
+  const catSplit = category.split(" ");
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
+  const account = db.collection(accountCollection);
+  const getAccount = await account.find({ username: username, active: true }).toArray();
+  const totalForm = await collection.find({}).toArray();
   const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete" }).toArray();
   const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
-
+  const uniqueCode = `${getAccount[0]._id}${catSplit[0][0]}${catSplit[1][0]}${problem[0]}00${totalForm.length}`;
   const updateDocument = {
-    $set: { category: category, problems: problem, details: details },
+    $set: { category: category, problems: problem, details: details, uniquecode: uniqueCode },
   };
   const dataToInsert = await collection.updateOne(filter, updateDocument);
   return true;
@@ -100,9 +150,15 @@ async function appoint(activeDay, meetType, timePref, username) {
   const collection = db.collection(reserveCollection);
   const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete" }).toArray();
   const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
+  const currentTime = Date.now();
+  const currentDate = new Date(currentTime);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const DATE = `${day}/${month}/${year}`;
 
   const updateDocument = {
-    $set: { meetType: meetType, timePref: timePref, activeDay: activeDay, status: "complete" },
+    $set: { meetType: meetType, timePref: timePref, activeDay: activeDay, status: "complete", datecreated: DATE },
   };
   const dataToInsert = await collection.updateOne(filter, updateDocument);
   return true;
@@ -117,6 +173,18 @@ async function getUserData(username) {
   if (currentUser.length != 0) {
     dataCollect.push(currentUser[0].fullName, currentUser[0].email, currentUser[0]._id);
     return dataCollect;
+  } else {
+    return false;
+  }
+}
+
+async function getUserForm(username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const userForm = await session.find({ username: username }).toArray();
+  if (userForm.length != 0) {
+    return userForm;
   } else {
     return false;
   }
@@ -215,19 +283,18 @@ app.post("/signin", async (req, res) => {
 
 app.post("/session", async (req, res) => {
   const { request, userName } = req.body;
-  if (userName !== undefined) {
-    console.log("Masuk tidak undefined");
-    let reqData = await activeUser();
-    if (request == "reserve") {
-      let purgeIncomplete = await removeIncompleteForm(userName);
-    }
-    res.json(reqData);
-  } else {
-    return false;
+  let reqData = await activeUser();
+  if (request == "reserve") {
+    let purgeIncomplete = await removeIncompleteForm(userName);
   }
-
+  res.json(reqData);
 });
 
+app.post("/getuser", async (req, res) => {
+  const { username } = req.body;
+  let reqData = await activeUser1();
+  res.json(reqData);
+});
 
 app.post("/reserve", async (req, res) => {
   const { fullname, email, major, phoneNumber, nim, username } = req.body;
@@ -251,6 +318,18 @@ app.post("/getuserdata", async (req, res) => {
   const { username } = req.body;
   let reqData = await getUserData(username);
   res.json(reqData);
+});
+
+app.post("/getform", async (req, res) => {
+  const { username } = req.body;
+  let reqData = await getUserForm(username);
+  res.json(reqData);
+});
+
+app.post("/checkreserve", async (req, res) => {
+  const { reserveId } = req.body;
+  let checkData = await checkReserve(reserveId);
+  res.send(checkData);
 });
 
 app.post("/signout", async (req, res) => {
