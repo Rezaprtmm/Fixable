@@ -1,7 +1,7 @@
 "use client";
 import ButtonService from "@/components/ButtonService/Index";
 import Sidebar from "@/components/Sidebar/Index";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Topbar from "@/components/Topbar/Index";
 import ShowDropdown from "@/components/ShowDropdown/Index";
 import SortDropdown from "@/components/SortDropdown/Index";
@@ -9,7 +9,7 @@ import TableHistoryPay from "@/components/TableHistoryPay/Index";
 import ButtonHistory from "@/components/ButtonHistory/Index";
 
 export default function PaymentHistory() {
-	const [username, setUserName] = useState("username");
+	const [username, setUserName] = useState("");
 	const getUsername = async (userName: any) => {
 		setUserName(userName);
 	};
@@ -32,7 +32,7 @@ export default function PaymentHistory() {
 					</div>
 				</div>
 				<div>
-					<TableHistoryPay />
+					<TableHistoryPay getUsername={username} />
 				</div>
 			</div>
 		</div>

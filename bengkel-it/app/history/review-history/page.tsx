@@ -8,7 +8,7 @@ import ButtonHistory from "@/components/ButtonHistory/Index";
 import { useState } from "react";
 
 export default function ReviewHistory() {
-	const [username, setUserName] = useState("username");
+	const [username, setUserName] = useState("");
 	const getUsername = async (userName: any) => {
 		setUserName(userName);
 	};
@@ -31,7 +31,7 @@ export default function ReviewHistory() {
 					</div>
 				</div>
 				<div>
-					<TableHistoryRev />
+					<TableHistoryRev getUsername={username} />
 				</div>
 			</div>
 		</div>

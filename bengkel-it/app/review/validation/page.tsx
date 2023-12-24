@@ -1,14 +1,59 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Sidebar from "@/components/Sidebar/Index";
 import Topbar from "@/components/Topbar/Index";
 import ColumnOneRes from "@/components/ColumnOneRes/Index";
 import Link from "next/link";
+import axios from "axios";
 
 export default function validation() {
 	const [username, setUserName] = useState("username");
+	const [isValid, setIsValid] = useState(false);
+	const [valid, setValid] = useState("");
+	const [uniqueCode, setUniqueCode] = useState("");
 	const getUsername = async (userName: any) => {
 		setUserName(userName);
+		const purgeReview = await axios.post("http://localhost:3001/purgereview", { userName });
+	};
+
+	const handleUniqueCode = useCallback((event: { target: { value: any } }) => {
+		setUniqueCode(event.target.value);
+	}, []);
+
+	useEffect(() => {
+		if (uniqueCode.length >= 14) {
+			console.log("Masuk");
+			try {
+				fetch(`http://localhost:3001/checkunique`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					mode: "cors",
+					body: JSON.stringify({ uniqueCode, username }),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data == true) {
+							setValid("Valid");
+							setIsValid(true);
+						} else {
+							setValid("Invalid");
+							setIsValid(false);
+						}
+					})
+					.catch((error) => {
+						console.error("Terjadi kesalahan:", error);
+					});
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	}, [uniqueCode]);
+
+	const handleSubmit = async (e: { preventDefault: () => void }) => {
+		e.preventDefault();
+		if (isValid == true) {
+			window.location.href = "http://localhost:3000/review/form-review";
+		}
 	};
 
 	return (
@@ -42,20 +87,21 @@ export default function validation() {
 								</label>
 								<div className="mt-[8px] flex flex-row gap-[4px]">
 									<p className="text-dark-2 font-poppinstext-[12px] font-normal leading-[170%]">Your unique code can be found in your </p>
-									<Link href={"#"} className="text-info-main font-poppinstext-[12px] font-normal leading-[170%]">
+									<Link href={"/history/service-history"} className="text-info-main font-poppinstext-[12px] font-normal leading-[170%]">
 										reservation history.
 									</Link>
 								</div>
-								<input type="text" className="border-[1px] border-[#f8f8f8] h-[60px] rounded-[10px] shadow-input px-[20px] text-dark-2 font-poppinstext-[16px] font-normal leading-[170%] mt-[16px]" />
+								<input type="text" className="border-[1px] border-[#f8f8f8] h-[60px] rounded-[10px] shadow-input px-[20px] text-dark-2 font-poppinstext-[16px] font-normal leading-[170%] mt-[16px]" onChange={handleUniqueCode} />
 							</div>
 							<div>
 								<p className="text-dark-3 font-poppins text-[16px] font-normal leading-normal">
-									Code status: <span className="text-success-main font-poppins text-[16px] font-normal leading-normal">Valid</span>
+									Code status:{" "}
+									{isValid ? <span className="text-success-main font-poppins text-[16px] font-normal leading-normal">{valid}</span> : <span className="text-red-500 font-poppins text-[16px] font-normal leading-normal">{valid}</span>}
 								</p>
 							</div>
 						</div>
 						<div className="flex flex-col items-end">
-							<button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]">
+							<button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]" onClick={handleSubmit}>
 								Next{" "}
 								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
 									<path d="M9.5 17.5L14.5 12.5L9.5 7.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

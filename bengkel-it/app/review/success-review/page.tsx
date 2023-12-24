@@ -28,7 +28,7 @@ export default function SuccessReservation() {
 							<p className="text-dark-2 font-poppins text-[16px] font-normal leading-[130%] text-center">Thank you for providing your assessment of our service. Don&#39;t hesitate to come back if you encounter any problems.</p>
 						</div>
 						<div className="flex flex-row items-center  justify-center mt-[40px]">
-							<Link href={"#"} className="text-info-main font-poppins text-[16px] font-normal leading-normal border-b-[1px] border-info-main pb-[4px]">
+							<Link href={"/history/review-history"} className="text-info-main font-poppins text-[16px] font-normal leading-normal border-b-[1px] border-info-main pb-[4px]">
 								see history
 							</Link>
 						</div>

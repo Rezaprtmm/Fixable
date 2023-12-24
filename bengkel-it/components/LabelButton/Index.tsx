@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ArrowNav from "@/public/svgs/arrow-nav";
 import ButtonDropdown from "../ButtonDropdown/Index";
 
 interface LabelButtonProps {
 	title: string;
-	selectedMajor: any;
+	value: string;
+	onChange: (value: string) => void;
 }
 
 export default function LabelButton(props: LabelButtonProps) {
-	const { title, selectedMajor } = props;
+	const { title, onChange, value } = props;
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedOption, setSelectedOption] = useState("Choose a category");
 
@@ -20,8 +21,13 @@ export default function LabelButton(props: LabelButtonProps) {
 	const handleOptionClick = (option: string) => {
 		setSelectedOption(option);
 		setIsOpen(false);
-		selectedMajor(option);
+		onChange(option);
 	};
+
+	useEffect(() => {
+		// Ketika nilai value di komponen utama berubah, update selectedOption di dalam komponen LabelButton
+		setSelectedOption(value);
+	}, [value]);
 
 	return (
 		<div className="flex flex-col">

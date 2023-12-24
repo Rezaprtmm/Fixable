@@ -5,11 +5,14 @@ import Success from "@/public/svgs/success";
 import Link from "next/link";
 import ColumnOneRes from "@/components/ColumnOneRes/Index";
 import { useState } from "react";
+import axios from "axios";
 
 export default function SuccessReservation() {
 	const [username, setUserName] = useState("username");
 	const getUsername = async (userName: any) => {
 		setUserName(userName);
+
+		const getForm = await axios.post("http://localhost:3001/recentform", { username });
 	};
 
 	return (
@@ -30,7 +33,7 @@ export default function SuccessReservation() {
 							</p>
 						</div>
 						<div className="flex flex-row items-center  justify-center mt-[40px]">
-							<Link href={"#"} className="text-info-main font-poppins text-[16px] font-normal leading-normal border-b-[1px] border-info-main pb-[4px]">
+							<Link href={"/history/service-history"} className="text-info-main font-poppins text-[16px] font-normal leading-normal border-b-[1px] border-info-main pb-[4px]">
 								see history
 							</Link>
 						</div>

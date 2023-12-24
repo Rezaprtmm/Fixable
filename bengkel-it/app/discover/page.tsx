@@ -8,6 +8,9 @@ import axios from "axios";
 
 export default function Discover() {
 	const [username, setUserName] = useState("username");
+	const [reserveStat, setReserveStat] = useState("-");
+	const [completedStat, setCompletedStat] = useState("-");
+	const [reviewStat, setReviewStat] = useState("-");
 	const request = "halo";
 
 	window.onload = async function () {
@@ -16,6 +19,14 @@ export default function Discover() {
 	};
 
 	const getUsername = async (userName: any) => {
+		const fetchData = await axios.post("http://localhost:3001/getstat", { userName });
+
+		if (fetchData.data) {
+			setReserveStat(fetchData.data[0]);
+			setCompletedStat(fetchData.data[1]);
+			setReviewStat(fetchData.data[2]);
+		}
+
 		setUserName(userName);
 	};
 
@@ -42,9 +53,9 @@ export default function Discover() {
 					</div>
 				</div>
 				<div className="grid grid-cols-3 mt-[24px] gap-[40px]">
-					<CardDiscover title="Reservation" num="3" desc1="reservations made" desc2="in this month" />
-					<CardDiscover title="Services" num="2" desc1="services completed" desc2="in this month" />
-					<CardDiscover title="Feedback" num="1" desc1="reviews given" desc2="in this month" />
+					<CardDiscover title="Reservation" num={reserveStat} desc1="reservations made" desc2="in this month" />
+					<CardDiscover title="Services" num={completedStat} desc1="services completed" desc2="in this month" />
+					<CardDiscover title="Feedback" num={reviewStat} desc1="reviews given" desc2="in this month" />
 				</div>
 			</div>
 		</div>

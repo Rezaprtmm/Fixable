@@ -6,16 +6,38 @@ import Arrow from "@/public/svgs/arrow";
 import LabelButtonMeeting from "@/components/LabelButtonMeeting/Index";
 import LabelButtonTime from "@/components/LabelButtonTime/Index";
 import ButtonDay from "@/components/ButtonDay/Index";
+import axios from "axios";
 
 export default function Appointment() {
 	const [activeDay, isActiveDay] = useState<string>("Monday");
-	const [meetType, setMeetType] = useState("");
-	const [timePref, setTimePref] = useState("");
-
+	const [meetType, setMeetType] = useState("Choose a meeting type");
+	const [timePref, setTimePref] = useState("Choose your time preference");
 	const [username, setUserName] = useState("username");
+
 	const getUsername = async (userName: any) => {
+		if (userName != undefined) {
+			var username = userName;
+			const getForm = await axios.post("http://localhost:3001/recentform", { username });
+
+			if (getForm.data) {
+				if (getForm.data[0].activeDay != null) {
+					isActiveDay(getForm.data[0].activeDay);
+				}
+
+				if (getForm.data[0].meetType != null) {
+					setMeetType(getForm.data[0].meetType);
+				}
+
+				if (getForm.data[0].timePref != null) {
+					setTimePref(getForm.data[0].timePref);
+				}
+			} else {
+				window.location.href = "http://localhost:3000/reservation/member";
+			}
+		}
 		setUserName(userName);
 	};
+
 	const handleDaySelect = (selectedDay: string) => {
 		if (selectedDay !== activeDay) {
 			isActiveDay(selectedDay);
@@ -54,7 +76,6 @@ export default function Appointment() {
 
 	const handleBack = async (e: { preventDefault: () => void }) => {
 		e.preventDefault();
-
 		window.location.href = "http://localhost:3000/reservation/services";
 	};
 
@@ -100,10 +121,10 @@ export default function Appointment() {
 							</div>
 							<div className="flex flex-col mt-[24px] gap-[16px]">
 								{/* Meeting type */}
-								<LabelButtonMeeting title="Meeting type" setMeet={handleMeet} />
+								<LabelButtonMeeting title="Meeting type" value={meetType} setMeet={handleMeet} />
 
 								{/* Time preference */}
-								<LabelButtonTime title="Time preference" setTime={handleTime} />
+								<LabelButtonTime title="Time preference" value={timePref} setTime={handleTime} />
 
 								{/* Day you are available */}
 								<div className="flex flex-col">

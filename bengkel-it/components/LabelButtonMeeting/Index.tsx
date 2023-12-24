@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ArrowNav from "@/public/svgs/arrow-nav";
 import ButtonDropdown from "../ButtonDropdown/Index";
 
 interface LabelMeetingProps {
 	title: string;
 	setMeet: any;
+	value: string;
 }
 
 export default function LabelButtonMeeting(props: LabelMeetingProps) {
-	const { title, setMeet } = props;
+	const { title, setMeet, value } = props;
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedOption, setSelectedOption] = useState("Choose a meeting type");
 
@@ -22,6 +23,12 @@ export default function LabelButtonMeeting(props: LabelMeetingProps) {
 		setIsOpen(false);
 		setMeet(option);
 	};
+
+	useEffect(() => {
+		// Ketika nilai value di komponen utama berubah, update selectedOption di dalam komponen LabelButton
+		setSelectedOption(value);
+	}, [value]);
+
 	return (
 		<div className="flex flex-col">
 			<div className="flex flex-row items-center justify-between">

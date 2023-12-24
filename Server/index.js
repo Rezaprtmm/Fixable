@@ -10,6 +10,7 @@ const uri = "mongodb://localhost:27017"; // Ubah sesuai dengan URL MongoDB Anda
 const databaseName = "bengkel-it";
 const accountCollection = "account";
 const reserveCollection = "reservation";
+const priceCollection = "pricelist";
 const port = 3001;
 
 // Buat instance MongoClient
@@ -42,6 +43,40 @@ async function insertSignUp(fullName, userName, email, nim, password) {
   }
 }
 
+async function initializeData() {
+  await client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection(priceCollection);
+  // const databasesList = await client.db().admin().listDatabases();
+  // const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
+  const collections = await db.listCollections().toArray();
+  const collectionExists = collections.some((collection) => collection.name === priceCollection);
+
+  if (!collectionExists) {
+    await db.createCollection(priceCollection);
+  }
+
+  try {
+    const item = ["Windows", "MacOS", "Display", "RAM", "HDD", "SSD", "Battery", "Cooling System", "Motherboard", "Keyboard", "Touchpad", "Frontend", "Backend", "Fullstack", "UI/UX"];
+    const price = ["1000000", "1500000", "2000000", "500000", "350000", "550000", "1000000", "1500000", "5000000", "2000000", "750000", "1000000", "1250000", "3750000", "1500000"];
+    const dataToInsert = [];
+    item.forEach(function (element, index) {
+      if (index < 3) {
+        dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Software Repair", price: price[index] });
+      } else if (index >= 3 && index < 11) {
+        dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Hardware Repair", price: price[index] });
+      } else if (index >= 11 && index < 15) {
+        dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Web/App Creation", price: price[index] });
+      }
+
+    });
+    const result = await collection.insertMany(dataToInsert);
+    return true;
+  } catch (e) {
+    return true;
+  }
+}
+
 async function activeUser() {
   await client.connect();
   const db = client.db(databaseName);
@@ -54,13 +89,55 @@ async function activeUser() {
   }
 }
 
-async function checkReserve(reserveId) {
-  console.log(reserveId);
+async function checkReserve(reserveId, username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const currentUser = await session.find({ _id: reserveId.trim() }).toArray();
+  const currentUser = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
   if (currentUser.length != 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+async function getPriceBil(username, reserveId) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const getForm = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  if (getForm.length != 0) {
+    return getForm;
+  } else {
+    return false;
+  }
+}
+
+async function getUserStat(username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const reserveForm = await session.find({ username: username, status: "complete" }).toArray();
+  const completedForm = await session.find({ username: username, ispaid: true }).toArray();
+  const reviewForm = await session.find({ username: username, review: "complete" }).toArray();
+  const reserveStat = reserveForm.length;
+  const completedStat = completedForm.length;
+  const reviewStat = reviewForm.length;
+  const overall = [reserveStat, completedStat, reviewStat];
+  return overall;
+}
+
+async function checkUnique(uniqueCode, username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const currentUser = await session.find({ uniquecode: uniqueCode.trim(), username: username, ispaid: true, review: "pending" }).toArray();
+  if (currentUser.length != 0) {
+    const filter = { uniquecode: uniqueCode.trim(), username: username };
+    const updateDocument = {
+      $set: { review: "incomplete" },
+    };
+    const dataToInsert = await session.updateOne(filter, updateDocument);
     return true;
   } else {
     return false;
@@ -79,15 +156,69 @@ async function activeUser1() {
   }
 }
 
+async function getPaymentHistory(getUsername) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const paymentHistory = await session.find({ ispaid: true, username: getUsername }).toArray();
+  if (paymentHistory.length != 0) {
+    return paymentHistory;
+  } else {
+    return false;
+  }
+}
+
+async function retrieveUserReview(getUsername) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const userReview = await session.find({ username: getUsername, review: "complete" }).toArray();
+  if (userReview.length != 0) {
+    return userReview;
+  } else {
+    return false;
+  }
+}
+
 async function removeIncompleteForm(username) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
-  const deleteIncomplete = await collection.deleteMany({ username: username, status: "incomplete" });
+  const deleteIncomplete = await collection.deleteMany({ username: username, status: "incomplete", purgable: true });
   return true;
 }
 
-async function reservation(nim, fullname, email, major, phoneNumber, username) {
+async function removeIncompleteReview(userName) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection(reserveCollection);
+  const filter = { username: userName.trim(), review: "incomplete" };
+  const updateDocument = {
+    $set: { review: "pending" },
+  };
+  const dataToInsert = await collection.updateOne(filter, updateDocument);
+  return true;
+}
+
+async function cancelPurgeForm(username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection(reserveCollection);
+  const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete", purgable: true }).toArray();
+
+  if (getIncomplete.length != 0) {
+    const filter = { username: username.trim(), status: "incomplete" };
+    const updateDocument = {
+      $set: { purgable: false },
+    };
+    const dataToInsert = await collection.updateOne(filter, updateDocument);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+async function reservation(nim, fullname, email, major, phoneNumber, username, formID) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
@@ -100,29 +231,47 @@ async function reservation(nim, fullname, email, major, phoneNumber, username) {
     await db.createCollection(reserveCollection);
   }
 
-  const dataToInsert = [
-    {
-      _id: formId,
-      uniquecode: null,
-      status: "incomplete",
-      datecreated: null,
-      datesolved: "-",
-      fullname: fullname,
-      username: username,
-      email: email,
-      major: major,
-      phonenumber: phoneNumber,
-      category: null,
-      problems: null,
-      details: null,
-      meetType: null,
-      timePref: null,
-      activeDay: null,
-      ispaid: false,
-    },
-  ];
-
-  const result = await collection.insertMany(dataToInsert);
+  if (formID == undefined) {
+    const dataToInsert = [
+      {
+        _id: formId,
+        uniquecode: null,
+        purgable: true,
+        status: "incomplete",
+        review: "pending",
+        datecreated: null,
+        datesolved: "-",
+        fullname: fullname,
+        username: username,
+        email: email,
+        major: major,
+        phonenumber: phoneNumber,
+        category: null,
+        problems: null,
+        details: null,
+        meetType: null,
+        timePref: null,
+        activeDay: null,
+        partname: null,
+        partprice: null,
+        servicefee: null,
+        ispaid: false,
+      },
+    ];
+    const result = await collection.insertMany(dataToInsert);
+  } else {
+    const filter = { _id: formID };
+    const updateDocument = {
+      $set: {
+        fullname: fullname,
+        username: username,
+        email: email,
+        major: major,
+        phonenumber: phoneNumber,
+      },
+    };
+    const dataToInsert = await collection.updateOne(filter, updateDocument);
+  }
   return true;
 }
 
@@ -132,13 +281,16 @@ async function services(category, problem, details, username) {
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
   const account = db.collection(accountCollection);
+  const pricelist = db.collection(priceCollection);
   const getAccount = await account.find({ username: username, active: true }).toArray();
   const totalForm = await collection.find({}).toArray();
+  const getPrice = await pricelist.find({ type: category.trim() }).toArray();
+  const getItem = getPrice[Math.floor(Math.random() * getPrice.length)];
   const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete" }).toArray();
   const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
   const uniqueCode = `${getAccount[0]._id}${catSplit[0][0]}${catSplit[1][0]}${problem[0]}00${totalForm.length}`;
   const updateDocument = {
-    $set: { category: category, problems: problem, details: details, uniquecode: uniqueCode },
+    $set: { category: category, problems: problem, details: details, uniquecode: uniqueCode, purgable: false, partname: getItem.name, partprice: getItem.price, servicefee: "10000" },
   };
   const dataToInsert = await collection.updateOne(filter, updateDocument);
   return true;
@@ -178,13 +330,95 @@ async function getUserData(username) {
   }
 }
 
+async function insertReviewForm(username, message) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const currentTime = Date.now();
+  const currentDate = new Date(currentTime);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const DATE = `${day}/${month}/${year}`;
+  const filter = { username: username.trim(), review: "incomplete" };
+  const updateDocument = {
+    $set: { message: message, review: "complete", reviewdate: DATE },
+  };
+  const dataToInsert = await session.updateOne(filter, updateDocument);
+  return true;
+}
+
 async function getUserForm(username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const userForm = await session.find({ username: username }).toArray();
+  const userForm = await session.find({ username: username, purgable: false, status: "complete" }).toArray();
   if (userForm.length != 0) {
     return userForm;
+  } else {
+    return false;
+  }
+}
+
+async function getRecentForm(username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const userForm = await session.find({
+    username: username, purgable: false, status: "incomplete"
+  }).toArray();
+  if (userForm.length != 0) {
+    return userForm;
+  } else {
+    return false;
+  }
+}
+
+async function vaCheckout(username, reserveId, bank, vaNumber, totalPrice) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const currentForm = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  const totalForm = await session.find({ ispaid: true }).toArray();
+  const currentTime = Date.now();
+  const currentDate = new Date(currentTime);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const DATE = `${day}/${month}/${year}`;
+  const paymentId = `014${day}${month}${year}00${totalForm.length}`;
+  if (currentForm.length != 0) {
+    const filter = { _id: reserveId.trim(), username: username };
+    const updateDocument = {
+      $set: { ispaid: true, datesolved: DATE, paymentId: paymentId, bankname: bank, vanumber: vaNumber, totalprice: totalPrice },
+    };
+    const dataToInsert = await session.updateOne(filter, updateDocument);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+async function ewCheckout(username, reserveId, eWallet, eWalletNumber, totalPrice) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const currentForm = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  const totalForm = await session.find({ ispaid: true }).toArray();
+  const currentTime = Date.now();
+  const currentDate = new Date(currentTime);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const DATE = `${day}/${month}/${year}`;
+  const paymentId = `014${day}${month}${year}00${totalForm.length}`;
+  if (currentForm.length != 0) {
+    const filter = { _id: reserveId.trim(), username: username };
+    const updateDocument = {
+      $set: { ispaid: true, datesolved: DATE, paymentId: paymentId, ewalletname: eWallet, ewalletnumber: eWalletNumber, totalprice: totalPrice },
+    };
+    const dataToInsert = await session.updateOne(filter, updateDocument);
+    return true;
   } else {
     return false;
   }
@@ -284,10 +518,19 @@ app.post("/signin", async (req, res) => {
 app.post("/session", async (req, res) => {
   const { request, userName } = req.body;
   let reqData = await activeUser();
-  if (request == "reserve") {
-    let purgeIncomplete = await removeIncompleteForm(userName);
-  }
   res.json(reqData);
+});
+
+app.post("/initdata", async (req, res) => {
+  const { request } = req.body;
+  let initData = await initializeData();
+  res.send(initData);
+});
+
+app.post("/getprice", async (req, res) => {
+  const { username, reserveId } = req.body;
+  let getData = await getPriceBil(username, reserveId);
+  res.json(getData);
 });
 
 app.post("/getuser", async (req, res) => {
@@ -296,16 +539,48 @@ app.post("/getuser", async (req, res) => {
   res.json(reqData);
 });
 
+app.post("/purge", async (req, res) => {
+  const { request, username } = req.body;
+  if (request == "purge") {
+    let purgeData = await removeIncompleteForm(username);
+    res.send(purgeData);
+  } else if (request == "cancel") {
+    let preventPurge = await cancelPurgeForm(username);
+    res.send(preventPurge);
+  }
+});
+
+app.post("/purgereview", async (req, res) => {
+  const { userName } = req.body;
+  const purgeReview = await removeIncompleteReview(userName);
+  res.send(purgeReview);
+});
+
 app.post("/reserve", async (req, res) => {
-  const { fullname, email, major, phoneNumber, nim, username } = req.body;
-  let inputReserve = await reservation(nim, fullname, email, major, phoneNumber, username);
-  res.json(inputReserve);
+  const { fullname, email, major, phoneNumber, nim, username, formId } = req.body;
+
+  if (formId == "") {
+    var validPhoneNumber;
+    if (phoneNumber[0] != "0") {
+      validPhoneNumber = `+62${phoneNumber}`;
+    } else {
+      validPhoneNumber = phoneNumber.slice(1);
+      validPhoneNumber = `+62${validPhoneNumber}`;
+    }
+
+    let inputReserve = await reservation(nim, fullname, email, major, validPhoneNumber, username);
+    res.send(inputReserve);
+  } else {
+    let inputReserve = await reservation(nim, fullname, email, major, phoneNumber, username, formId);
+    res.send(inputReserve);
+  }
 });
 
 app.post("/services", async (req, res) => {
   const { category, problem, details, username } = req.body;
   let inputServices = await services(category, problem, details, username);
   res.send(inputServices);
+
 });
 
 app.post("/appoint", async (req, res) => {
@@ -326,9 +601,59 @@ app.post("/getform", async (req, res) => {
   res.json(reqData);
 });
 
+app.post("/getstat", async (req, res) => {
+  const { userName } = req.body;
+  let reqData = await getUserStat(userName);
+  res.json(reqData);
+});
+
+app.post("/recentform", async (req, res) => {
+  const { username } = req.body;
+  let reqData = await getRecentForm(username);
+  res.json(reqData);
+});
+
 app.post("/checkreserve", async (req, res) => {
-  const { reserveId } = req.body;
-  let checkData = await checkReserve(reserveId);
+  const { reserveId, username } = req.body;
+  let checkData = await checkReserve(reserveId, username);
+  res.send(checkData);
+});
+
+app.post("/paymenthistory", async (req, res) => {
+  const { getUsername } = req.body;
+  console.log(getUsername);
+  let checkData = await getPaymentHistory(getUsername);
+  res.json(checkData);
+});
+
+app.post("/checkunique", async (req, res) => {
+  const { uniqueCode, username } = req.body;
+  let checkData = await checkUnique(uniqueCode, username);
+  res.send(checkData);
+});
+
+app.post("/review", async (req, res) => {
+  const { username, category, message } = req.body;
+  let insertReview = await insertReviewForm(username, message);
+  res.send(insertReview);
+});
+
+app.post("/getreview", async (req, res) => {
+  const { getUsername } = req.body;
+  let getReviewUser = await retrieveUserReview(getUsername);
+  res.json(getReviewUser);
+});
+
+
+app.post("/vacheckout", async (req, res) => {
+  const { username, reserveId, bank, vaNumber, totalPrice } = req.body;
+  let checkData = await vaCheckout(username, reserveId, bank, vaNumber, totalPrice);
+  res.send(checkData);
+});
+
+app.post("/ewcheckout", async (req, res) => {
+  const { username, reserveId, eWallet, eWalletNumber, totalPrice } = req.body;
+  let checkData = await ewCheckout(username, reserveId, eWallet, eWalletNumber, totalPrice);
   res.send(checkData);
 });
 

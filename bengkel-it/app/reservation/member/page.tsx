@@ -11,13 +11,33 @@ import axios from "axios";
 export default function Member() {
 	const [username, setUserName] = useState("");
 	const [nameChecked, setNameChecked] = useState(false);
+	const [nameAffirm, setNameAffirm] = useState(false);
 	const [emailChecked, setEmailChecked] = useState(false);
 	const [fullname, setFullname] = useState("");
 	const [email, setEmail] = useState("");
-	const [major, setMajor] = useState("");
+	const [major, setMajor] = useState("Choose a category");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [nim, setNim] = useState("");
-	const request = "reserve";
+	const [isForm, setIsForm] = useState(false);
+	const [formId, setFormId] = useState("");
+	const request = "purge";
+	const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+	const getUsername = async (userName: any) => {
+		var username = userName;
+		const getForm = await axios.post("http://localhost:3001/recentform", { username });
+		const purgeData = await axios.post("http://localhost:3001/purge", { request, username });
+
+		if (getForm.data) {
+			setFullname(getForm.data[0].fullname);
+			setEmail(getForm.data[0].email);
+			setMajor(getForm.data[0].major);
+			setPhoneNumber(getForm.data[0].phonenumber);
+			setFormId(getForm.data[0]._id);
+			setIsForm(true);
+		}
+		setUserName(userName);
+	};
 
 	const handleNameCheckboxChange = (checked: boolean) => {
 		setNameChecked(checked);
@@ -43,14 +63,10 @@ export default function Member() {
 		setPhoneNumber(event.target.value);
 	};
 
-	const getUsername = async (userName: any) => {
-		setUserName(userName);
-		const fetchUserName = await axios.post("http://localhost:3001/session", { request, userName });
-	};
-
 	useEffect(() => {
 		const fetchData = async () => {
 			const getData = await axios.post("http://localhost:3001/getuserdata", { username });
+
 			setNim(getData.data[2]);
 
 			if (nameChecked) {
@@ -64,37 +80,55 @@ export default function Member() {
 
 		if (nameChecked) {
 			fetchData();
-		} else {
-			setFullname("");
 		}
 
 		if (emailChecked) {
 			fetchData();
-		} else {
-			setEmail("");
 		}
 	}, [nameChecked, emailChecked]);
 
 	const handleSubmit = async (e: { preventDefault: () => void }) => {
 		e.preventDefault();
 
-		fetch("http://localhost:3001/reserve", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			mode: "cors",
-			body: JSON.stringify({ fullname, email, major, phoneNumber, nim, username }),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data) {
-					window.location.href = "http://localhost:3000/reservation/services";
-				} else {
-					alert("Gagal mengunggah data");
-				}
+		if (fullname == "") {
+			alert("Please insert your name");
+		} else if (fullname.length < 3 && nameAffirm == false) {
+			const konfirm = confirm("Your name is too short. Are you sure?");
+
+			if (konfirm) {
+				setNameAffirm(true);
+			} else {
+				setNameAffirm(false);
+			}
+		} else if (email == "") {
+			alert("Please insert your email");
+		} else if (!emailPattern.test(email)) {
+			alert("Please insert a valid email");
+		} else if (major == "Choose a category") {
+			alert("Please insert your major");
+		} else if (phoneNumber == "") {
+			alert("Please insert your phone number");
+		} else if (phoneNumber.length <= 9) {
+			alert("Please insert a valid phone number");
+		} else {
+			fetch("http://localhost:3001/reserve", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				mode: "cors",
+				body: JSON.stringify({ fullname, email, major, phoneNumber, nim, username, formId }),
 			})
-			.catch((error) => {
-				console.error("Terjadi kesalahan:", error);
-			});
+				.then((response) => response.json())
+				.then((data) => {
+					if (data == true) {
+						window.location.href = "http://localhost:3000/reservation/services";
+					} else {
+						alert("Gagal mengunggah data");
+					}
+				})
+				.catch((error) => {
+					console.error("Terjadi kesalahan:", error);
+				});
+		}
 	};
 
 	return (
@@ -121,7 +155,7 @@ export default function Member() {
 								<LabelRes title="Active email" type="text" isChecked={emailChecked} onCheckboxChange={handleEmailCheckboxChange} onChange={handleEmail} value={email} placeholder={""} />
 
 								{/* Major */}
-								<LabelButton title="Major" selectedMajor={handleMajor} />
+								<LabelButton title="Major" value={major} onChange={handleMajor} />
 
 								{/* Telephone */}
 								<div className="flex flex-col">
@@ -137,7 +171,12 @@ export default function Member() {
 										<div className="absolute h-[60px] inset-y-0 left-0 mt-[8px] flex items-center">
 											<label className="py-[10px] px-[20px] text-dark-2 font-poppins text-[16px] font-normal leading-[170%] border-r-[1px] border-dark-2">+62</label>
 										</div>
-										<input type="tel" className="w-full border-[1px] border-[#f8f8f8] h-[60px] rounded-[10px] shadow-input px-[90px] text-dark-2 font-poppins text-[16px] font-normal leading-[170%] mt-[8px]" onChange={handlePhoneNumber} />
+										<input
+											type="tel"
+											className="w-full border-[1px] border-[#f8f8f8] h-[60px] rounded-[10px] shadow-input px-[90px] text-dark-2 font-poppins text-[16px] font-normal leading-[170%] mt-[8px]"
+											onChange={handlePhoneNumber}
+											value={phoneNumber}
+										/>
 									</div>
 								</div>
 							</div>

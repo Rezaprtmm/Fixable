@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ArrowNav from "@/public/svgs/arrow-nav";
 import ButtonDropdown from "../ButtonDropdown/Index";
 
 interface LabelTimeProps {
 	title: string;
 	setTime: any;
+	value: string;
 }
 
 export default function LabelButtonTime(props: LabelTimeProps) {
-	const { title, setTime } = props;
+	const { title, setTime, value } = props;
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedOption, setSelectedOption] = useState("Choose your time preference");
 
@@ -22,6 +23,11 @@ export default function LabelButtonTime(props: LabelTimeProps) {
 		setIsOpen(false);
 		setTime(option);
 	};
+
+	useEffect(() => {
+		// Ketika nilai value di komponen utama berubah, update selectedOption di dalam komponen LabelButton
+		setSelectedOption(value);
+	}, [value]);
 	return (
 		<div className="flex flex-col">
 			<div className="flex flex-row items-center justify-between">
@@ -36,8 +42,8 @@ export default function LabelButtonTime(props: LabelTimeProps) {
 				{isOpen && (
 					<div className="absolute mt-2 p-2 bg-white border-[1px] border-[#C3C3C3] rounded-[10px] w-full flex flex-col px-[20px] z-10">
 						<ButtonDropdown title="9.00 AM - 11.59 AM" className={`${selectedOption === "9.00 AM - 11.59 AM" ? "font-bold" : ""}`} onClick={() => handleOptionClick("9.00 AM - 11.59 AM")} />
-						<ButtonDropdown title="zzzzzz" className={`${selectedOption === "zzzzzz" ? "font-bold" : ""}`} onClick={() => handleOptionClick("zzzzzz")} />
-						<ButtonDropdown title="zzzzzz" className={`${selectedOption === "zzzzzz" ? "font-bold" : ""}`} onClick={() => handleOptionClick("zzzzzz")} />
+						<ButtonDropdown title="13.00 PM - 15.00 PM" className={`${selectedOption === "13.00 PM - 15.00 PM" ? "font-bold" : ""}`} onClick={() => handleOptionClick("13.00 PM - 15.00 PM")} />
+						<ButtonDropdown title="18.00 PM - 21.00 PM" className={`${selectedOption === "18.00 PM - 21.00 PM" ? "font-bold" : ""}`} onClick={() => handleOptionClick("18.00 PM - 21.00 PM")} />
 					</div>
 				)}
 				<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 pt-1 lg:pt-1 lg:pr-4">
