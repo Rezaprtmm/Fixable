@@ -55,23 +55,29 @@ export default function Appointment() {
 	const handleSubmit = async (e: { preventDefault: () => void }) => {
 		e.preventDefault();
 
-		fetch("http://localhost:3001/appoint", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			mode: "cors",
-			body: JSON.stringify({ activeDay, meetType, timePref, username }),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data) {
-					window.location.href = "http://localhost:3000/reservation/success-reservation";
-				} else {
-					alert("Gagal mengunggah data");
-				}
+		if (meetType == "Choose a meeting type") {
+			alert("Please choose the meeting type");
+		} else if (timePref == "Choose your time preference") {
+			alert("Plase choose your time preference");
+		} else {
+			fetch("http://localhost:3001/appoint", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				mode: "cors",
+				body: JSON.stringify({ activeDay, meetType, timePref, username }),
 			})
-			.catch((error) => {
-				console.error("Terjadi kesalahan:", error);
-			});
+				.then((response) => response.json())
+				.then((data) => {
+					if (data) {
+						window.location.href = "http://localhost:3000/reservation/success-reservation";
+					} else {
+						alert("Gagal mengunggah data");
+					}
+				})
+				.catch((error) => {
+					console.error("Terjadi kesalahan:", error);
+				});
+		}
 	};
 
 	const handleBack = async (e: { preventDefault: () => void }) => {

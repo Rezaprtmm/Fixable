@@ -10,6 +10,7 @@ export default function FormReview() {
 	const [username, setUserName] = useState("");
 	const [category, setCategory] = useState("Choose a category");
 	const [message, setMessage] = useState("");
+	const [isMessage, setIsMessage] = useState(false);
 
 	const getUsername = async (userName: any) => {
 		setUserName(userName);
@@ -32,25 +33,37 @@ export default function FormReview() {
 	const handleSubmit = async (e: { preventDefault: () => void }) => {
 		e.preventDefault();
 
-		console.log(username, category, message);
+		if (category == "Choose a category") {
+			alert("Please choose a category");
+		} else if (message == "") {
+			alert("Please enter a review message");
+		} else if (message.length < 3 && isMessage == false) {
+			const isConfirm = confirm("Your message too short. Are you sure to proceed?");
 
-		fetch(`http://localhost:3001/review`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			mode: "cors",
-			body: JSON.stringify({ username, category, message }),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data == true) {
-					window.location.href = "http://localhost:3000/review/success-review";
-				} else {
-					alert("Gagal memproses pembayaran");
-				}
+			if (isConfirm) {
+				setIsMessage(true);
+			} else {
+				setIsMessage(false);
+			}
+		} else {
+			fetch(`http://localhost:3001/review`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				mode: "cors",
+				body: JSON.stringify({ username, category, message }),
 			})
-			.catch((error) => {
-				console.error("Terjadi kesalahan:", error);
-			});
+				.then((response) => response.json())
+				.then((data) => {
+					if (data == true) {
+						window.location.href = "http://localhost:3000/review/success-review";
+					} else {
+						alert("Gagal memproses pembayaran");
+					}
+				})
+				.catch((error) => {
+					console.error("Terjadi kesalahan:", error);
+				});
+		}
 	};
 
 	return (

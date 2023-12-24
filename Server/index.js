@@ -32,8 +32,15 @@ async function insertSignUp(fullName, userName, email, nim, password) {
   const idCheck = await collection.find({ _id: nim }).toArray();
   const unameCheck = await collection.find({ username: userName }).toArray();
   const emailCheck = await collection.find({ email: email }).toArray();
+  const currentTime = Date.now();
+  const currentDate = new Date(currentTime);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const DATE = `${day}/${month}/${year}`;
+
   if (idCheck.length == 0 && emailCheck == 0 && unameCheck == 0) {
-    const dataToInsert = [{ _id: nim, fullName: fullName, username: userName, email: email, password: password, active: true }];
+    const dataToInsert = [{ _id: nim, fullName: fullName, username: userName, email: email, datecreated: DATE, password: password, active: true, role: "Member/Customer" }];
     const result = await collection.insertMany(dataToInsert);
     return true;
   } else if (idCheck.length != 0) {
@@ -75,6 +82,19 @@ async function initializeData() {
   } catch (e) {
     return true;
   }
+}
+
+async function editUserProfile(username, phone, email, customerID) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection(accountCollection);
+
+  const filter = { _id: customerID };
+  const updateDocument = {
+    $set: { username: username, phonenumber: phone, email: email },
+  };
+  const dataToInsert = await collection.updateOne(filter, updateDocument);
+  return true;
 }
 
 async function activeUser() {
@@ -175,6 +195,18 @@ async function retrieveUserReview(getUsername) {
   const userReview = await session.find({ username: getUsername, review: "complete" }).toArray();
   if (userReview.length != 0) {
     return userReview;
+  } else {
+    return false;
+  }
+}
+
+async function retrieveUserProfile(userName) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(accountCollection);
+  const userProfile = await session.find({ username: userName }).toArray();
+  if (userProfile.length != 0) {
+    return userProfile;
   } else {
     return false;
   }
@@ -386,7 +418,7 @@ async function vaCheckout(username, reserveId, bank, vaNumber, totalPrice) {
   const month = currentDate.getMonth() + 1;
   const day = currentDate.getDate();
   const DATE = `${day}/${month}/${year}`;
-  const paymentId = `014${day}${month}${year}00${totalForm.length}`;
+  const paymentId = `014${day}${month}${year}00${totalForm.length + 1}`;
   if (currentForm.length != 0) {
     const filter = { _id: reserveId.trim(), username: username };
     const updateDocument = {
@@ -411,7 +443,7 @@ async function ewCheckout(username, reserveId, eWallet, eWalletNumber, totalPric
   const month = currentDate.getMonth() + 1;
   const day = currentDate.getDate();
   const DATE = `${day}/${month}/${year}`;
-  const paymentId = `014${day}${month}${year}00${totalForm.length}`;
+  const paymentId = `014${day}${month}${year}00${totalForm.length + 1}`;
   if (currentForm.length != 0) {
     const filter = { _id: reserveId.trim(), username: username };
     const updateDocument = {
@@ -513,6 +545,12 @@ app.post("/signin", async (req, res) => {
   const { userCred, userPassword } = req.body;
   const insert = await signIn(userCred, userPassword);
   res.send(insert);
+});
+
+app.post("/editprofile", async (req, res) => {
+  const { username, phone, email, customerID } = req.body;
+  const editProfile = await editUserProfile(username, phone, email, customerID);
+  res.send(editProfile);
 });
 
 app.post("/session", async (req, res) => {
@@ -644,6 +682,11 @@ app.post("/getreview", async (req, res) => {
   res.json(getReviewUser);
 });
 
+app.post("/getprofile", async (req, res) => {
+  const { username } = req.body;
+  let getProfile = await retrieveUserProfile(username);
+  res.json(getProfile);
+});
 
 app.post("/vacheckout", async (req, res) => {
   const { username, reserveId, bank, vaNumber, totalPrice } = req.body;

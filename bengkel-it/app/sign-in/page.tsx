@@ -5,11 +5,13 @@ import Logo from "@/public/svgs/logo";
 import IconPassword from "@/public/svgs/icon-password";
 import IconUsername from "@/public/svgs/icon-username";
 import Label from "@/components/Label/Index";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function SignIn() {
 	const [userCred, setUserCred] = useState("");
 	const [userPassword, setUserPassword] = useState("");
+	const request = "halo";
 
 	const handleUserCred = (event: { target: { value: any } }) => {
 		setUserCred(event.target.value);
@@ -39,6 +41,18 @@ export default function SignIn() {
 				console.error("Terjadi kesalahan:", error);
 			});
 	};
+
+	useEffect(() => {
+		const isLogin = async function () {
+			const loginCheck = await axios.post("http://localhost:3001/session", { request });
+
+			if (loginCheck.data) {
+				window.location.href = "http://localhost:3000/discover";
+			}
+		};
+
+		isLogin();
+	});
 
 	return (
 		<div className="pl-[100px] mx-auto flex flex-row h-screen">

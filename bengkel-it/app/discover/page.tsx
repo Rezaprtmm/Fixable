@@ -53,8 +53,8 @@ export default function Discover() {
 					</div>
 				</div>
 				<div className="grid grid-cols-3 mt-[24px] gap-[40px]">
-					<CardDiscover title="Reservation" num={reserveStat} desc1="reservations made" desc2="in this month" />
-					<CardDiscover title="Services" num={completedStat} desc1="services completed" desc2="in this month" />
+					<CardDiscover title="Reservations" num={reserveStat} desc1="reservations made" desc2="in this month" />
+					<CardDiscover title="Service" num={completedStat} desc1="services completed" desc2="in this month" />
 					<CardDiscover title="Feedback" num={reviewStat} desc1="reviews given" desc2="in this month" />
 				</div>
 			</div>

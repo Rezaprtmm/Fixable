@@ -16,6 +16,7 @@ export default function CardPayment({ formCred }: any) {
 	const [eWallet, setEWallet] = useState("");
 	const [eWalletNumber, setEWalletNumber] = useState("");
 	const [coupon, setCoupon] = useState("");
+	const [confirmCoupon, setConfirmCoupon] = useState(false);
 	const [paymentMethod, setPaymentMethod] = useState(true);
 	const [bankColor, setBankColor] = useState("info-main");
 	const [eWalletColor, setEWalletColor] = useState("stone-700");
@@ -92,8 +93,24 @@ export default function CardPayment({ formCred }: any) {
 				alert("Please choose the bank");
 			} else if (companyCode == "") {
 				alert("Please insert the company code");
+			} else if (bank == "Mandiri" && companyCode != "008") {
+				alert("Please insert the correct company code for Mandiri. It's 008");
+			} else if (bank == "BCA" && companyCode != "014") {
+				alert("Please insert the correct company code for BCA. It's 014");
 			} else if (vaNumber == "") {
 				alert("Please insert the VA number");
+			} else if ((bank == "BCA" && vaNumber.length < 10) || vaNumber.length >= 13) {
+				alert("Please insert the correct VA number for BCA. It should be at 10 character at minimum and 12 character at maximum");
+			} else if ((bank == "Mandiri" && vaNumber.length < 16) || vaNumber.length >= 17) {
+				alert("Please insert the correct VA number for Mandiri. It should be at 16 character");
+			} else if (coupon == "" && confirmCoupon == false) {
+				const isCoupon = confirm("Are you sure to proceed without using coupon?");
+
+				if (isCoupon) {
+					setConfirmCoupon(true);
+				} else {
+					setConfirmCoupon(false);
+				}
 			} else {
 				fetch(`http://localhost:3001/vacheckout`, {
 					method: "POST",
