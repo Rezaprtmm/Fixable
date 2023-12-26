@@ -216,6 +216,18 @@ async function retrieveUserReview(getUsername, request) {
   }
 }
 
+async function fetchAllReview() {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const userReview = await session.find({}).toArray();
+  if (userReview.length != 0) {
+    return userReview;
+  } else {
+    return false;
+  }
+}
+
 async function retrieveUserProfile(userName) {
   await client.connect();
   const db = client.db(databaseName);
@@ -712,6 +724,12 @@ app.post("/review", async (req, res) => {
   const { username, category, message } = req.body;
   let insertReview = await insertReviewForm(username, message);
   res.send(insertReview);
+});
+
+app.post("/getallreview", async (req, res) => {
+  const { request } = req.body;
+  let fetchReview = await fetchAllReview();
+  res.json(fetchReview);
 });
 
 app.post("/getreview", async (req, res) => {
