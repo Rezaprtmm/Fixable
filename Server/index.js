@@ -75,7 +75,6 @@ async function initializeData() {
       } else if (index >= 11 && index < 15) {
         dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Web/App Creation", price: price[index] });
       }
-
     });
     const result = await collection.insertMany(dataToInsert);
     return true;
@@ -116,6 +115,18 @@ async function checkReserve(reserveId, username) {
   const currentUser = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
   if (currentUser.length != 0) {
     return true;
+  } else {
+    return false;
+  }
+}
+
+async function fetchActiveReserve(username) {
+  await client.connect();
+  const db = client.db(databaseName);
+  const session = db.collection(reserveCollection);
+  const activeForm = await session.find({ username: username, ispaid: false }).toArray();
+  if (activeForm.length != 0) {
+    return activeForm;
   } else {
     return false;
   }
@@ -188,11 +199,16 @@ async function getPaymentHistory(getUsername) {
   }
 }
 
-async function retrieveUserReview(getUsername) {
+async function retrieveUserReview(getUsername, request) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const userReview = await session.find({ username: getUsername, review: "complete" }).toArray();
+  var userReview;
+  if (request == "validation") {
+    userReview = await session.find({ username: getUsername, ispaid: true, review: "incomplete" }).toArray();
+  } else {
+    userReview = await session.find({ username: getUsername, ispaid: true }).toArray();
+  }
   if (userReview.length != 0) {
     return userReview;
   } else {
@@ -316,8 +332,16 @@ async function services(category, problem, details, username) {
   const pricelist = db.collection(priceCollection);
   const getAccount = await account.find({ username: username, active: true }).toArray();
   const totalForm = await collection.find({}).toArray();
-  const getPrice = await pricelist.find({ type: category.trim() }).toArray();
-  const getItem = getPrice[Math.floor(Math.random() * getPrice.length)];
+  var getItem;
+
+  if (category != "Web/App Creation") {
+    const getPrice = await pricelist.find({ type: category.trim() }).toArray();
+    getItem = getPrice[Math.floor(Math.random() * getPrice.length)];
+  } else {
+    const getPrice = await pricelist.find({ type: category.trim(), name: problem.split(" ")[0] }).toArray();
+    getItem = getPrice[0];
+  }
+
   const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete" }).toArray();
   const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
   const uniqueCode = `${getAccount[0]._id}${catSplit[0][0]}${catSplit[1][0]}${problem[0]}00${totalForm.length}`;
@@ -396,9 +420,13 @@ async function getRecentForm(username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const userForm = await session.find({
-    username: username, purgable: false, status: "incomplete"
-  }).toArray();
+  const userForm = await session
+    .find({
+      username: username,
+      purgable: false,
+      status: "incomplete",
+    })
+    .toArray();
   if (userForm.length != 0) {
     return userForm;
   } else {
@@ -559,6 +587,17 @@ app.post("/session", async (req, res) => {
   res.json(reqData);
 });
 
+app.post("/getreserve", async (req, res) => {
+  const { userName } = req.body;
+  let reqData = await fetchActiveReserve(userName);
+
+  if (reqData == false) {
+    res.send(reqData);
+  } else {
+    res.json(reqData);
+  }
+});
+
 app.post("/initdata", async (req, res) => {
   const { request } = req.body;
   let initData = await initializeData();
@@ -618,7 +657,6 @@ app.post("/services", async (req, res) => {
   const { category, problem, details, username } = req.body;
   let inputServices = await services(category, problem, details, username);
   res.send(inputServices);
-
 });
 
 app.post("/appoint", async (req, res) => {
@@ -654,12 +692,12 @@ app.post("/recentform", async (req, res) => {
 app.post("/checkreserve", async (req, res) => {
   const { reserveId, username } = req.body;
   let checkData = await checkReserve(reserveId, username);
-  res.send(checkData);
+  res.json(checkData);
 });
 
 app.post("/paymenthistory", async (req, res) => {
   const { getUsername } = req.body;
-  console.log(getUsername);
+
   let checkData = await getPaymentHistory(getUsername);
   res.json(checkData);
 });
@@ -677,8 +715,8 @@ app.post("/review", async (req, res) => {
 });
 
 app.post("/getreview", async (req, res) => {
-  const { getUsername } = req.body;
-  let getReviewUser = await retrieveUserReview(getUsername);
+  const { getUsername, request } = req.body;
+  let getReviewUser = await retrieveUserReview(getUsername, request);
   res.json(getReviewUser);
 });
 
