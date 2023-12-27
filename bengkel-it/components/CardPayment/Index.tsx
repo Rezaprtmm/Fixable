@@ -8,6 +8,7 @@ import TextPayment from "../TextPayment/Index";
 import LabelEWallet from "../LabelEWallet/Index";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import SuccessPayment from "@/public/svgs/success-payment";
 
 export default function CardPayment({ formCred }: any) {
   const [bank, setBank] = useState("");
@@ -100,7 +101,9 @@ export default function CardPayment({ formCred }: any) {
       if (bank == "") {
         alert("Please choose the bank");
       } else if (coupon == "" && confirmCoupon == false) {
-        const isCoupon = confirm("Are you sure to proceed without using coupon?");
+        const isCoupon = confirm(
+          "Are you sure to proceed without using coupon?"
+        );
 
         if (isCoupon) {
           setConfirmCoupon(true);
@@ -112,7 +115,13 @@ export default function CardPayment({ formCred }: any) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
-          body: JSON.stringify({ username, reserveId, bank, vaNumber, totalPrice }),
+          body: JSON.stringify({
+            username,
+            reserveId,
+            bank,
+            vaNumber,
+            totalPrice,
+          }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -136,7 +145,13 @@ export default function CardPayment({ formCred }: any) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
-          body: JSON.stringify({ username, reserveId, eWallet, eWalletNumber, totalPrice }),
+          body: JSON.stringify({
+            username,
+            reserveId,
+            eWallet,
+            eWalletNumber,
+            totalPrice,
+          }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -155,7 +170,10 @@ export default function CardPayment({ formCred }: any) {
 
   useEffect(() => {
     const fetchPrice = async function () {
-      const fetch = await axios.post("http://localhost:3001/getprice", { username, reserveId });
+      const fetch = await axios.post("http://localhost:3001/getprice", {
+        username,
+        reserveId,
+      });
       setRepairFee(parseInt(fetch.data[0].partprice));
       setServiceFee(parseInt(fetch.data[0].servicefee));
       setPPN(repairFee * 0.11);
@@ -167,27 +185,59 @@ export default function CardPayment({ formCred }: any) {
   return (
     <div className="grid grid-cols-2 mt-[24px] border-[1px] border-[#D5D5D5] rounded-[20px]">
       <div className="flex flex-col p-[20px]">
-        <h3 className="text-black font-poppins text-[22px] font-normal leading-[150%]">Payment Details</h3>
-        <p className="text-dark-1 font-poppins text-[16px] font-normal leading-[170%] mt-[8px]">Complete your payment</p>
+        <h3 className="text-black font-poppins text-[22px] font-normal leading-[150%]">
+          Payment Details
+        </h3>
+        <p className="text-dark-1 font-poppins text-[16px] font-normal leading-[170%] mt-[8px]">
+          Complete your payment
+        </p>
         <div className="flex flex-row items-center mt-[24px] gap-[28px]">
-          <button className={`text-${bankColor} font-poppins text-[16px] border-b-[2px] border-${bankColor} pb-[8px]`} onClick={handleBankBtn}>
+          <button
+            className={`text-${bankColor} font-poppins text-[16px] border-b-[2px] border-${bankColor} pb-[8px]`}
+            onClick={handleBankBtn}
+          >
             Virtual Account
           </button>
-          <button className={`text-${eWalletColor} font-poppins text-[16px] border-b-[2px] border-${eWalletColor} pb-[8px]`} onClick={handleEWalletBtn}>
+          <button
+            className={`text-${eWalletColor} font-poppins text-[16px] border-b-[2px] border-${eWalletColor} pb-[8px]`}
+            onClick={handleEWalletBtn}
+          >
             e-Wallet
           </button>
         </div>
         {paymentMethod ? (
           <div className="flex flex-col mt-[24px] gap-[16px] pb-[57px]">
             <LabelBank title="Choose Bank" onChange={handleBank} />
-            <LabelRes title="Company code" value={companyCode} onChange={handleCompanyCode} type="text" className="hidden" disabled={true} />
-            <LabelRes title="Virtual account number" value={vaNumber} onChange={handleVaNumber} type="text" className="hidden" disabled={true} />
+            <LabelRes
+              title="Company code"
+              value={companyCode}
+              onChange={handleCompanyCode}
+              type="text"
+              className="hidden"
+              disabled={true}
+            />
+            <LabelRes
+              title="Virtual account number"
+              value={vaNumber}
+              onChange={handleVaNumber}
+              type="text"
+              className="hidden"
+              disabled={true}
+            />
             <LabelCoupon title="Coupon" onChange={handleCoupon} />
           </div>
         ) : (
           <div className="flex flex-col mt-[24px] gap-[16px] pb-[57px]">
             <LabelEWallet title="Choose e-wallet" onChange={handleEWallet} />
-            <LabelRes title="e-wallet number" value={eWalletNumber} onChange={handleEWalletNumber} type="text" className="hidden" placeholder="Type your e-wallet number" disabled={false} />
+            <LabelRes
+              title="e-wallet number"
+              value={eWalletNumber}
+              onChange={handleEWalletNumber}
+              type="text"
+              className="hidden"
+              placeholder="Type your e-wallet number"
+              disabled={false}
+            />
             <LabelCoupon title="Coupon" onChange={handleCoupon} />
           </div>
         )}
@@ -197,17 +247,61 @@ export default function CardPayment({ formCred }: any) {
           <div className="flex flex-col items-center">
             <Transaction />
           </div>
-          <h3 className="text-black font-poppins text-[16px] font-bold leading-[170%] text-start mt-[20px]">Payment Summary</h3>
+          <h3 className="text-black font-poppins text-[16px] font-bold leading-[170%] text-start mt-[20px]">
+            Payment Summary
+          </h3>
           <div className="flex flex-col mt-[16px] gap-[8px]">
-            <TextPayment title="Repair fee" price={repairFee} className1="text-dark-2" />
-            <TextPayment title="PPN (11%)" price={PPN} plus="+ " className1="text-success-main" />
-            <TextPayment title="Services fee" price={serviceFee} plus="+ " className1="text-success-main" />
-            <TextPayment title="Coupon" price={discCoupon} plus="- " className1="text-success-main" />
-            <TextPayment title="Total" price={totalPrice} className1="text-dark-2" />
+            <TextPayment
+              title="Repair fee"
+              price={repairFee}
+              className1="text-dark-2"
+            />
+            <TextPayment
+              title="PPN (11%)"
+              price={PPN}
+              plus="+ "
+              className1="text-success-main"
+            />
+            <TextPayment
+              title="Services fee"
+              price={serviceFee}
+              plus="+ "
+              className1="text-success-main"
+            />
+            <TextPayment
+              title="Coupon"
+              price={discCoupon}
+              plus="- "
+              className1="text-success-main"
+            />
+            <TextPayment
+              title="Total"
+              price={totalPrice}
+              className1="text-dark-2"
+            />
           </div>
-          <button className="bg-info-main rounded-[10px] py-[13px] text-white font-poppins text-[14px] font-normal leading-[170%] mt-[52px]" onClick={handleSubmit}>
-            Refresh
+          <button
+            className="bg-info-main rounded-[10px] py-[13px] text-white font-poppins text-[14px] font-normal leading-[170%] mt-[52px]"
+            onClick={handleSubmit}
+          >
+            Pay now
           </button>
+        </div>
+        <div className="bg-white w-[70%] shadow-payment flex flex-col px-[20px] rounded-[10px] py-[60px]">
+          <h3 className="text-info-main font-poppins text-[16px] font-bold leading-[130%] text-center">
+            Yuhuu, Payment Successfully!
+          </h3>
+          <div className="flex flex-col gap-[8px] items-center mt-[74px]">
+            <SuccessPayment />
+          </div>
+          <div className="flex flex-row items-center justify-center">
+            <button
+              className="border-b-[1px] border-b-info-main py-[13px] text-info-main font-poppins text-[12px] font-normal leading-[170%] mt-[71px]"
+              onClick={handleSubmit}
+            >
+              See payment history
+            </button>
+          </div>
         </div>
       </div>
     </div>
