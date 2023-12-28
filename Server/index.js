@@ -220,7 +220,7 @@ async function fetchAllReview() {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const userReview = await session.find({}).toArray();
+  const userReview = await session.find({ review: "complete" }).toArray();
   if (userReview.length != 0) {
     return userReview;
   } else {

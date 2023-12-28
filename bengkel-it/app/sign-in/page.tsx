@@ -46,7 +46,7 @@ export default function SignIn() {
 		const isLogin = async function () {
 			const loginCheck = await axios.post("http://localhost:3001/session", { request });
 
-			if (loginCheck.data) {
+			if (loginCheck.data != false) {
 				window.location.href = "http://localhost:3000/discover";
 			}
 		};
