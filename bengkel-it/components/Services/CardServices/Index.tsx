@@ -1,5 +1,4 @@
 import Arrow from "@/public/svgs/arrow";
-import Hardware from "@/public/svgs/hardware";
 import React from "react";
 
 interface CardServicesProps {
@@ -8,10 +7,14 @@ interface CardServicesProps {
   desc: string;
   className?: string;
   classNameA?: string;
+  onClick: (
+    e: React.MouseEvent<HTMLButtonElement>,
+    buttonText: string
+  ) => Promise<void>;
 }
 
 export default function CardServices(props: CardServicesProps) {
-  const { icon, title, desc, className, classNameA } = props;
+  const { icon, title, desc, className, classNameA, onClick } = props;
   return (
     <div
       className={`w-full flex flex-row border-[1px] border-blue-main bg-white rounded-[20px] p-[20px] gap-[20px] ${className}`}
@@ -26,7 +29,9 @@ export default function CardServices(props: CardServicesProps) {
         </p>
       </div>
       <div className="w-[10%] flex flex-row justify-end">
-        <Arrow className={`w-full ${classNameA}`} />
+        <button onClick={(e) => onClick(e, "")}>
+          <Arrow className={`w-full ${classNameA}`} />
+        </button>
       </div>
     </div>
   );

@@ -25,8 +25,13 @@ export default function Member() {
 
   const getUsername = async (userName: any) => {
     var username = userName;
-    const getForm = await axios.post("http://localhost:3001/recentform", { username });
-    const purgeData = await axios.post("http://localhost:3001/purge", { request, username });
+    const getForm = await axios.post("http://localhost:3001/recentform", {
+      username,
+    });
+    const purgeData = await axios.post("http://localhost:3001/purge", {
+      request,
+      username,
+    });
 
     if (getForm.data) {
       setFullname(getForm.data[0].fullname);
@@ -63,9 +68,14 @@ export default function Member() {
     setPhoneNumber(event.target.value);
   };
 
+  const isRequiredFieldsFilled =
+    fullname && email && major !== "Choose a category" && phoneNumber;
+
   useEffect(() => {
     const fetchData = async () => {
-      const getData = await axios.post("http://localhost:3001/getuserdata", { username });
+      const getData = await axios.post("http://localhost:3001/getuserdata", {
+        username,
+      });
 
       setNim(getData.data[2]);
 
@@ -115,7 +125,15 @@ export default function Member() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         mode: "cors",
-        body: JSON.stringify({ fullname, email, major, phoneNumber, nim, username, formId }),
+        body: JSON.stringify({
+          fullname,
+          email,
+          major,
+          phoneNumber,
+          nim,
+          username,
+          formId,
+        }),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -136,9 +154,14 @@ export default function Member() {
       <Sidebar activeMenu="reservation" userName={getUsername} />
       <Topbar />
       <div className="ml-64 flex flex-col px-[40px] mt-[40px] h-full pb-[67px]">
-        <h3 className="text-black font-poppins text-[22px] font-normal leading-[150%]">Reservation</h3>
+        <h3 className="text-black font-poppins text-[22px] font-normal leading-[150%]">
+          Reservation
+        </h3>
         <div className="mt-[24px] grid grid-cols-3 gap-[40px]">
-          <ColumnOneRes title="Get help as soon as possible" desc="In general, please fill in the form beside to provide us with an overview of the problem you are experiencing." />
+          <ColumnOneRes
+            title="Get help as soon as possible"
+            desc="In general, please fill in the form beside to provide us with an overview of the problem you are experiencing."
+          />
           <div className="col-span-2 border-[1px] border-[#D5D5D5] rounded-[20px] p-[20px] h-[800px] flex flex-col justify-between">
             <div className="flex flex-col">
               <div className="w-full flex flex-row gap-[12px]">
@@ -146,30 +169,61 @@ export default function Member() {
                 <hr className="w-1/3 h-[10px] bg-dark-4 rounded-[5px]" />
                 <hr className="w-1/3 h-[10px] bg-dark-4 rounded-[5px]" />
               </div>
-              <p className="text-black font-poppins text-[16px] font-bold leading-[130%] mt-[60px]">Member Information</p>
+              <p className="text-black font-poppins text-[16px] font-bold leading-[130%] mt-[60px]">
+                Member Information
+              </p>
               <div className="flex flex-col mt-[24px] gap-[16px]">
                 {/* Fulname */}
-                <LabelRes title="Fullname" type="text" isChecked={nameChecked} onCheckboxChange={handleNameCheckboxChange} onChange={handleFullname} value={fullname} placeholder={""} disabled={false} />
+                <LabelRes
+                  title="Fullname"
+                  type="text"
+                  isChecked={nameChecked}
+                  onCheckboxChange={handleNameCheckboxChange}
+                  onChange={handleFullname}
+                  value={fullname}
+                  placeholder={""}
+                  disabled={false}
+                />
 
                 {/* EMail */}
-                <LabelRes title="Active email" type="text" isChecked={emailChecked} onCheckboxChange={handleEmailCheckboxChange} onChange={handleEmail} value={email} placeholder={""} disabled={false} />
+                <LabelRes
+                  title="Active email"
+                  type="text"
+                  isChecked={emailChecked}
+                  onCheckboxChange={handleEmailCheckboxChange}
+                  onChange={handleEmail}
+                  value={email}
+                  placeholder={""}
+                  disabled={false}
+                />
 
                 {/* Major */}
-                <LabelButton title="Major" value={major} onChange={handleMajor} />
+                <LabelButton
+                  title="Major"
+                  value={major}
+                  onChange={handleMajor}
+                />
 
                 {/* Telephone */}
                 <div className="flex flex-col">
                   <div className="flex flex-row items-center justify-between">
-                    <label htmlFor="" className="text-black font-poppins text-[16px] font-normal leading-[170%]">
+                    <label
+                      htmlFor=""
+                      className="text-black font-poppins text-[16px] font-normal leading-[170%]"
+                    >
                       Phone number
                     </label>
                     <div className="flex flex-row items-center gap-[8px]">
-                      <p className="text-dark-2 font-poppins text-[12px] font-normal leading-[170%]">Connected to WhatsApp</p>
+                      <p className="text-dark-2 font-poppins text-[12px] font-normal leading-[170%]">
+                        Connected to WhatsApp
+                      </p>
                     </div>
                   </div>
                   <div className="relative w-full flex items-center">
                     <div className="absolute h-[60px] inset-y-0 left-0 mt-[8px] flex items-center">
-                      <label className="py-[10px] px-[20px] text-dark-2 font-poppins text-[16px] font-normal leading-[170%] border-r-[1px] border-dark-2">+62</label>
+                      <label className="py-[10px] px-[20px] text-dark-2 font-poppins text-[16px] font-normal leading-[170%] border-r-[1px] border-dark-2">
+                        +62
+                      </label>
                     </div>
                     <input
                       type="tel"
@@ -182,10 +236,28 @@ export default function Member() {
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <button className="bg-info-main px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]" onClick={handleSubmit}>
+              <button
+                className={`${
+                  isRequiredFieldsFilled ? "bg-info-main" : "bg-dark-4"
+                } px-[24px] py-[12px] flex flex-row items-center text-white font-poppins text-[16px] font-normal leading-[170%] rounded-[10px] gap-[8px]`}
+                onClick={handleSubmit}
+                disabled={!isRequiredFieldsFilled}
+              >
                 Next{" "}
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M9.5 17.5L14.5 12.5L9.5 7.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M9.5 17.5L14.5 12.5L9.5 7.5"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </button>
             </div>

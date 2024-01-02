@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Repair() {
   return (
-    <div className="bg-blue-darker w-full mt-[120px]">
+    <div className="bg-blue-darker w-full mt-[120px]" id="portofolio">
       <div className="pl-[170px] flex flex-row pt-[120px] gap-[125px]">
         <div className="w-[43%]">
           <h3 className="text-white font-poppins text-[44px] font-bold leading-[130%]">

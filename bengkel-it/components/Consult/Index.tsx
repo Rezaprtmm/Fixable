@@ -5,7 +5,7 @@ import React from "react";
 
 export default function Consult() {
   return (
-    <div className="px-[100px] flex flex-col  mt-[120px]">
+    <div className="px-[100px] flex flex-col  mt-[120px]" id="consultation">
       <div className="bg-blue-subtle rounded-[30px] py-[60px]">
         <h3 className="text-blue-main font-poppins text-center text-[44px] font-bold leading-[130%]">
           Want to consult with us?
