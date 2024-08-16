@@ -30,7 +30,7 @@ export default function CardServices(props: CardServicesProps) {
       </div>
       <div className="w-[10%] flex flex-row justify-end">
         <button onClick={(e) => onClick(e, "")}>
-          <Arrow className={`w-full ${classNameA}`} />
+          <Arrow className={`w-full text-blue-main ${classNameA}`} />
         </button>
       </div>
     </div>

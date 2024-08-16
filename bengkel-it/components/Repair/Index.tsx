@@ -6,7 +6,7 @@ export default function Repair() {
     <div className="bg-blue-darker w-full mt-[120px]" id="portofolio">
       <div className="pl-[170px] flex flex-row pt-[120px] gap-[125px]">
         <div className="w-[43%]">
-          <h3 className="text-white font-poppins text-[44px] font-bold leading-[130%]">
+          <h3 className="bg-gradient-to-r from-blue-lighter to-white bg-clip-text text-transparent font-poppins text-[44px] font-bold leading-[130%]">
             What we&lsquo;ve done
           </h3>
           <p className="text-light-1 font-poppins text-[16px] font-normal leading-[170%] mt-[16px]">

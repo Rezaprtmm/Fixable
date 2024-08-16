@@ -70,7 +70,14 @@ export default function Navbar() {
   return (
     <div className="bg-white w-full">
       <div className="px-[100px] mx-auto flex flex-row items-center justify-between py-[28px]">
-        <Logo />
+        <Image
+          src={"/images/Logo.svg"}
+          alt="Logo"
+          width={0}
+          height={0}
+          sizes="100%"
+          className="w-full max-w-[200px] h-12"
+        />
         <div className="flex flex-row items-center gap-[30px]">
           <button
             onClick={(e) => handleSubmit(e, "Reservation")}
@@ -124,7 +131,7 @@ export default function Navbar() {
           </div>
         ) : (
           <button
-            className="bg-blue-main px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
+            className="bg-gradient-to-r from-black to-blue-main px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
             onClick={(e) => handleSubmit(e, "Login")}
           >
             Sign In

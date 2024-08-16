@@ -14,7 +14,10 @@ const priceCollection = "pricelist";
 const port = 3001;
 
 // Buat instance MongoClient
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 async function insertSignUp(fullName, userName, email, nim, password) {
   await client.connect();
@@ -23,7 +26,9 @@ async function insertSignUp(fullName, userName, email, nim, password) {
   // const databasesList = await client.db().admin().listDatabases();
   // const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
   const collections = await db.listCollections().toArray();
-  const collectionExists = collections.some((collection) => collection.name === accountCollection);
+  const collectionExists = collections.some(
+    (collection) => collection.name === accountCollection
+  );
 
   if (!collectionExists) {
     await db.createCollection(accountCollection);
@@ -40,7 +45,18 @@ async function insertSignUp(fullName, userName, email, nim, password) {
   const DATE = `${day}/${month}/${year}`;
 
   if (idCheck.length == 0 && emailCheck == 0 && unameCheck == 0) {
-    const dataToInsert = [{ _id: nim, fullName: fullName, username: userName, email: email, datecreated: DATE, password: password, active: true, role: "Member/Customer" }];
+    const dataToInsert = [
+      {
+        _id: nim,
+        fullName: fullName,
+        username: userName,
+        email: email,
+        datecreated: DATE,
+        password: password,
+        active: true,
+        role: "Member/Customer",
+      },
+    ];
     const result = await collection.insertMany(dataToInsert);
     return true;
   } else if (idCheck.length != 0) {
@@ -57,23 +73,72 @@ async function initializeData() {
   // const databasesList = await client.db().admin().listDatabases();
   // const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
   const collections = await db.listCollections().toArray();
-  const collectionExists = collections.some((collection) => collection.name === priceCollection);
+  const collectionExists = collections.some(
+    (collection) => collection.name === priceCollection
+  );
 
   if (!collectionExists) {
     await db.createCollection(priceCollection);
   }
 
   try {
-    const item = ["Windows", "MacOS", "Display", "RAM", "HDD", "SSD", "Battery", "Cooling System", "Motherboard", "Keyboard", "Touchpad", "Frontend", "Backend", "Fullstack", "UI/UX"];
-    const price = ["1000000", "1500000", "2000000", "500000", "350000", "550000", "1000000", "1500000", "5000000", "2000000", "750000", "1000000", "1250000", "3750000", "1500000"];
+    const item = [
+      "Windows",
+      "MacOS",
+      "Display",
+      "RAM",
+      "HDD",
+      "SSD",
+      "Battery",
+      "Cooling System",
+      "Motherboard",
+      "Keyboard",
+      "Touchpad",
+      "Frontend",
+      "Backend",
+      "Fullstack",
+      "UI/UX",
+    ];
+    const price = [
+      "1000000",
+      "1500000",
+      "2000000",
+      "500000",
+      "350000",
+      "550000",
+      "1000000",
+      "1500000",
+      "5000000",
+      "2000000",
+      "750000",
+      "1000000",
+      "1250000",
+      "3750000",
+      "1500000",
+    ];
     const dataToInsert = [];
     item.forEach(function (element, index) {
       if (index < 3) {
-        dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Software Repair", price: price[index] });
+        dataToInsert.push({
+          _id: `${index + 1}`,
+          name: element,
+          type: "Software Repair",
+          price: price[index],
+        });
       } else if (index >= 3 && index < 11) {
-        dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Hardware Repair", price: price[index] });
+        dataToInsert.push({
+          _id: `${index + 1}`,
+          name: element,
+          type: "Hardware Repair",
+          price: price[index],
+        });
       } else if (index >= 11 && index < 15) {
-        dataToInsert.push({ _id: `${index + 1}`, name: element, type: "Web/App Creation", price: price[index] });
+        dataToInsert.push({
+          _id: `${index + 1}`,
+          name: element,
+          type: "Web/App Creation",
+          price: price[index],
+        });
       }
     });
     const result = await collection.insertMany(dataToInsert);
@@ -112,7 +177,9 @@ async function checkReserve(reserveId, username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const currentUser = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  const currentUser = await session
+    .find({ _id: reserveId.trim(), username: username, ispaid: false })
+    .toArray();
   if (currentUser.length != 0) {
     return true;
   } else {
@@ -124,7 +191,9 @@ async function fetchActiveReserve(username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const activeForm = await session.find({ username: username, ispaid: false }).toArray();
+  const activeForm = await session
+    .find({ username: username, ispaid: false })
+    .toArray();
   if (activeForm.length != 0) {
     return activeForm;
   } else {
@@ -136,7 +205,9 @@ async function getPriceBil(username, reserveId) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const getForm = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  const getForm = await session
+    .find({ _id: reserveId.trim(), username: username, ispaid: false })
+    .toArray();
   if (getForm.length != 0) {
     return getForm;
   } else {
@@ -148,9 +219,15 @@ async function getUserStat(username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const reserveForm = await session.find({ username: username, status: "complete" }).toArray();
-  const completedForm = await session.find({ username: username, ispaid: true }).toArray();
-  const reviewForm = await session.find({ username: username, review: "complete" }).toArray();
+  const reserveForm = await session
+    .find({ username: username, status: "complete" })
+    .toArray();
+  const completedForm = await session
+    .find({ username: username, ispaid: true })
+    .toArray();
+  const reviewForm = await session
+    .find({ username: username, review: "complete" })
+    .toArray();
   const reserveStat = reserveForm.length;
   const completedStat = completedForm.length;
   const reviewStat = reviewForm.length;
@@ -162,7 +239,14 @@ async function checkUnique(uniqueCode, username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const currentUser = await session.find({ uniquecode: uniqueCode.trim(), username: username, ispaid: true, review: "pending" }).toArray();
+  const currentUser = await session
+    .find({
+      uniquecode: uniqueCode.trim(),
+      username: username,
+      ispaid: true,
+      review: "pending",
+    })
+    .toArray();
   if (currentUser.length != 0) {
     const filter = { uniquecode: uniqueCode.trim(), username: username };
     const updateDocument = {
@@ -191,7 +275,9 @@ async function getPaymentHistory(getUsername) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const paymentHistory = await session.find({ ispaid: true, username: getUsername }).toArray();
+  const paymentHistory = await session
+    .find({ ispaid: true, username: getUsername })
+    .toArray();
   if (paymentHistory.length != 0) {
     return paymentHistory;
   } else {
@@ -205,9 +291,13 @@ async function retrieveUserReview(getUsername, request) {
   const session = db.collection(reserveCollection);
   var userReview;
   if (request == "validation") {
-    userReview = await session.find({ username: getUsername, ispaid: true, review: "incomplete" }).toArray();
+    userReview = await session
+      .find({ username: getUsername, ispaid: true, review: "incomplete" })
+      .toArray();
   } else {
-    userReview = await session.find({ username: getUsername, ispaid: true }).toArray();
+    userReview = await session
+      .find({ username: getUsername, ispaid: true })
+      .toArray();
   }
   if (userReview.length != 0) {
     return userReview;
@@ -244,7 +334,11 @@ async function removeIncompleteForm(username) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
-  const deleteIncomplete = await collection.deleteMany({ username: username, status: "incomplete", purgable: true });
+  const deleteIncomplete = await collection.deleteMany({
+    username: username,
+    status: "incomplete",
+    purgable: true,
+  });
   return true;
 }
 
@@ -264,7 +358,9 @@ async function cancelPurgeForm(username) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
-  const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete", purgable: true }).toArray();
+  const getIncomplete = await collection
+    .find({ username: username.trim(), status: "incomplete", purgable: true })
+    .toArray();
 
   if (getIncomplete.length != 0) {
     const filter = { username: username.trim(), status: "incomplete" };
@@ -278,12 +374,22 @@ async function cancelPurgeForm(username) {
   }
 }
 
-async function reservation(nim, fullname, email, major, phoneNumber, username, formID) {
+async function reservation(
+  nim,
+  fullname,
+  email,
+  major,
+  phoneNumber,
+  username,
+  formID
+) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
   const collections = await db.listCollections().toArray();
-  const collectionExists = collections.some((collection) => collection.name === reserveCollection);
+  const collectionExists = collections.some(
+    (collection) => collection.name === reserveCollection
+  );
   const totalForm = await collection.find({}).toArray();
   const formId = `${nim}0${totalForm.length + 1}`;
 
@@ -342,7 +448,9 @@ async function services(category, problem, details, username) {
   const collection = db.collection(reserveCollection);
   const account = db.collection(accountCollection);
   const pricelist = db.collection(priceCollection);
-  const getAccount = await account.find({ username: username, active: true }).toArray();
+  const getAccount = await account
+    .find({ username: username, active: true })
+    .toArray();
   const totalForm = await collection.find({}).toArray();
   var getItem;
 
@@ -350,15 +458,28 @@ async function services(category, problem, details, username) {
     const getPrice = await pricelist.find({ type: category.trim() }).toArray();
     getItem = getPrice[Math.floor(Math.random() * getPrice.length)];
   } else {
-    const getPrice = await pricelist.find({ type: category.trim(), name: problem.split(" ")[0] }).toArray();
+    const getPrice = await pricelist
+      .find({ type: category.trim(), name: problem.split(" ")[0] })
+      .toArray();
     getItem = getPrice[0];
   }
 
-  const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete" }).toArray();
+  const getIncomplete = await collection
+    .find({ username: username.trim(), status: "incomplete" })
+    .toArray();
   const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
   const uniqueCode = `${getAccount[0]._id}${catSplit[0][0]}${catSplit[1][0]}${problem[0]}00${totalForm.length}`;
   const updateDocument = {
-    $set: { category: category, problems: problem, details: details, uniquecode: uniqueCode, purgable: false, partname: getItem.name, partprice: getItem.price, servicefee: "10000" },
+    $set: {
+      category: category,
+      problems: problem,
+      details: details,
+      uniquecode: uniqueCode,
+      purgable: false,
+      partname: getItem.name,
+      partprice: getItem.price,
+      servicefee: "10000",
+    },
   };
   const dataToInsert = await collection.updateOne(filter, updateDocument);
   return true;
@@ -368,7 +489,9 @@ async function appoint(activeDay, meetType, timePref, username) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(reserveCollection);
-  const getIncomplete = await collection.find({ username: username.trim(), status: "incomplete" }).toArray();
+  const getIncomplete = await collection
+    .find({ username: username.trim(), status: "incomplete" })
+    .toArray();
   const filter = { _id: getIncomplete[getIncomplete.length - 1]._id };
   const currentTime = Date.now();
   const currentDate = new Date(currentTime);
@@ -378,7 +501,13 @@ async function appoint(activeDay, meetType, timePref, username) {
   const DATE = `${day}/${month}/${year}`;
 
   const updateDocument = {
-    $set: { meetType: meetType, timePref: timePref, activeDay: activeDay, status: "complete", datecreated: DATE },
+    $set: {
+      meetType: meetType,
+      timePref: timePref,
+      activeDay: activeDay,
+      status: "complete",
+      datecreated: DATE,
+    },
   };
   const dataToInsert = await collection.updateOne(filter, updateDocument);
   return true;
@@ -391,7 +520,11 @@ async function getUserData(username) {
   const currentUser = await session.find({ username: username }).toArray();
   const dataCollect = [];
   if (currentUser.length != 0) {
-    dataCollect.push(currentUser[0].fullName, currentUser[0].email, currentUser[0]._id);
+    dataCollect.push(
+      currentUser[0].fullName,
+      currentUser[0].email,
+      currentUser[0]._id
+    );
     return dataCollect;
   } else {
     return false;
@@ -420,7 +553,9 @@ async function getUserForm(username) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const userForm = await session.find({ username: username, purgable: false, status: "complete" }).toArray();
+  const userForm = await session
+    .find({ username: username, purgable: false, status: "complete" })
+    .toArray();
   if (userForm.length != 0) {
     return userForm;
   } else {
@@ -450,7 +585,9 @@ async function vaCheckout(username, reserveId, bank, vaNumber, totalPrice) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const currentForm = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  const currentForm = await session
+    .find({ _id: reserveId.trim(), username: username, ispaid: false })
+    .toArray();
   const totalForm = await session.find({ ispaid: true }).toArray();
   const currentTime = Date.now();
   const currentDate = new Date(currentTime);
@@ -462,7 +599,14 @@ async function vaCheckout(username, reserveId, bank, vaNumber, totalPrice) {
   if (currentForm.length != 0) {
     const filter = { _id: reserveId.trim(), username: username };
     const updateDocument = {
-      $set: { ispaid: true, datesolved: DATE, paymentId: paymentId, bankname: bank, vanumber: vaNumber, totalprice: totalPrice },
+      $set: {
+        ispaid: true,
+        datesolved: DATE,
+        paymentId: paymentId,
+        bankname: bank,
+        vanumber: vaNumber,
+        totalprice: totalPrice,
+      },
     };
     const dataToInsert = await session.updateOne(filter, updateDocument);
     return true;
@@ -471,11 +615,19 @@ async function vaCheckout(username, reserveId, bank, vaNumber, totalPrice) {
   }
 }
 
-async function ewCheckout(username, reserveId, eWallet, eWalletNumber, totalPrice) {
+async function ewCheckout(
+  username,
+  reserveId,
+  eWallet,
+  eWalletNumber,
+  totalPrice
+) {
   await client.connect();
   const db = client.db(databaseName);
   const session = db.collection(reserveCollection);
-  const currentForm = await session.find({ _id: reserveId.trim(), username: username, ispaid: false }).toArray();
+  const currentForm = await session
+    .find({ _id: reserveId.trim(), username: username, ispaid: false })
+    .toArray();
   const totalForm = await session.find({ ispaid: true }).toArray();
   const currentTime = Date.now();
   const currentDate = new Date(currentTime);
@@ -487,7 +639,14 @@ async function ewCheckout(username, reserveId, eWallet, eWalletNumber, totalPric
   if (currentForm.length != 0) {
     const filter = { _id: reserveId.trim(), username: username };
     const updateDocument = {
-      $set: { ispaid: true, datesolved: DATE, paymentId: paymentId, ewalletname: eWallet, ewalletnumber: eWalletNumber, totalprice: totalPrice },
+      $set: {
+        ispaid: true,
+        datesolved: DATE,
+        paymentId: paymentId,
+        ewalletname: eWallet,
+        ewalletnumber: eWalletNumber,
+        totalprice: totalPrice,
+      },
     };
     const dataToInsert = await session.updateOne(filter, updateDocument);
     return true;
@@ -646,7 +805,8 @@ app.post("/purgereview", async (req, res) => {
 });
 
 app.post("/reserve", async (req, res) => {
-  const { fullname, email, major, phoneNumber, nim, username, formId } = req.body;
+  const { fullname, email, major, phoneNumber, nim, username, formId } =
+    req.body;
 
   if (formId == "") {
     var validPhoneNumber;
@@ -657,10 +817,25 @@ app.post("/reserve", async (req, res) => {
       validPhoneNumber = `+62${validPhoneNumber}`;
     }
 
-    let inputReserve = await reservation(nim, fullname, email, major, validPhoneNumber, username);
+    let inputReserve = await reservation(
+      nim,
+      fullname,
+      email,
+      major,
+      validPhoneNumber,
+      username
+    );
     res.send(inputReserve);
   } else {
-    let inputReserve = await reservation(nim, fullname, email, major, phoneNumber, username, formId);
+    let inputReserve = await reservation(
+      nim,
+      fullname,
+      email,
+      major,
+      phoneNumber,
+      username,
+      formId
+    );
     res.send(inputReserve);
   }
 });
@@ -746,13 +921,25 @@ app.post("/getprofile", async (req, res) => {
 
 app.post("/vacheckout", async (req, res) => {
   const { username, reserveId, bank, vaNumber, totalPrice } = req.body;
-  let checkData = await vaCheckout(username, reserveId, bank, vaNumber, totalPrice);
+  let checkData = await vaCheckout(
+    username,
+    reserveId,
+    bank,
+    vaNumber,
+    totalPrice
+  );
   res.send(checkData);
 });
 
 app.post("/ewcheckout", async (req, res) => {
   const { username, reserveId, eWallet, eWalletNumber, totalPrice } = req.body;
-  let checkData = await ewCheckout(username, reserveId, eWallet, eWalletNumber, totalPrice);
+  let checkData = await ewCheckout(
+    username,
+    reserveId,
+    eWallet,
+    eWalletNumber,
+    totalPrice
+  );
   res.send(checkData);
 });
 

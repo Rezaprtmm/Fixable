@@ -1,4 +1,4 @@
-import LogoFooter from "@/public/svgs/logo-footer";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -7,7 +7,14 @@ export default function Footer() {
         <p className="text-white font-poppins text-[16px] font-normal leading-[170%]">
           Copyright © 2023 Bengkel IT. All Rights Reserved.
         </p>
-        <LogoFooter />
+        <Image
+          src={"/images/Logo-White.svg"}
+          alt="Logo"
+          width={0}
+          height={0}
+          sizes="100%"
+          className="w-full max-w-[200px] h-12"
+        />
       </div>
     </div>
   );

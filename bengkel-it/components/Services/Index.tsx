@@ -55,14 +55,19 @@ export default function Services() {
       id="services"
     >
       <div className="w-[43%] flex flex-col">
-        <h3 className="text-black font-poppins text-[44px] font-bold leading-[130%]">
-          What we provide for you
+        <h3 className="bg-gradient-to-r from-black to-blue-main text-transparent bg-clip-text font-poppins text-[44px] font-bold leading-[130%]">
+          What we provide <br />
+          for you
         </h3>
         <p className="text-dark-2 font-poppins text-[16px] font-normal leading-[170%] mt-[16px]">
           We try to help you solve{" "}
-          <span className="text-error-main">your technology problems</span> by
-          providing the <span className="text-blue-main">best solutions</span>.
-          Choose a service and <span className="text-blue-main">have fun!</span>
+          <span className="text-error-main">
+            your technology <br />
+            problems
+          </span>{" "}
+          by providing the{" "}
+          <span className="text-blue-main">best solutions</span>. Choose <br />a
+          service and <span className="text-blue-main">have fun!</span>
         </p>
       </div>
       <div className="w-[57%]">
@@ -85,7 +90,6 @@ export default function Services() {
           title="Consultation with Our Team"
           desc="Free technology consultation with our team, try it now!"
           className="mb-[24px]"
-          classNameA="rotate-90"
           onClick={(e) => handleConsult(e, "Consultation")}
         />
         <CardServices
@@ -93,6 +97,7 @@ export default function Services() {
           title="Website/App Creation"
           desc="An easy way to create a website or application"
           className="mb-[24px]"
+          classNameA="rotate-[135deg]"
           onClick={(e) => handleReservation(e, "Reservation")}
         />
       </div>

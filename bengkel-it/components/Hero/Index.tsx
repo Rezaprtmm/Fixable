@@ -27,25 +27,29 @@ export default function Hero() {
   };
   return (
     <div className="px-[100px] mx-auto flex flex-col items-center gap-[24px]">
-      <h1 className="w-[1030px] text-black font-poppins text-[44px] font-bold leading-[130%] text-center z-10 mt-[120px]">
-        Technology is the <span className="text-blue-main">ocean</span> and we
-        are the <span className="text-blue-main">navigation</span>.
+      <h1 className="w-[1030px] bg-gradient-to-r from-black to-blue-main text-transparent bg-clip-text font-poppins text-[44px] font-bold leading-[130%] text-center z-10 mt-[120px]">
+        Before it turns to dust, <br />
+        everything can be fixed.
       </h1>
       <p className="text-black font-poppins text-[16px] font-normal leading-[170%] text-center">
         Quick solution to your technology problems, find your way at Bengkel IT!
       </p>
       <div className="flex flex-row items-center gap-[16px]">
         <button
-          className="bg-blue-main rounded-[26px] px-[24px] py-[12px] text-white font-poppins text-[16px] font-normal leading-[170%]"
+          className="bg-gradient-to-r from-black to-blue-main rounded-[26px] px-[24px] py-[12px] text-white font-poppins text-[16px] font-normal leading-[170%]"
           onClick={handleSubmit}
         >
           Reserve now
         </button>
         <Link
           href={"#consultation"}
-          className="border-[1px] border-blue-main rounded-[26px] px-[24px] py-[12px] text-blue-main font-poppins text-[16px] font-normal leading-[170%]"
+          className="relative inline-block rounded-[26px] p-[2px] bg-gradient-to-r from-black to-blue-main"
         >
-          Consultation
+          <div className="bg-white rounded-[24px] px-[24px] py-[12px]">
+            <span className="bg-gradient-to-r from-black to-blue-main bg-clip-text text-transparent font-poppins text-[16px] font-normal leading-[170%]">
+              Consultation
+            </span>
+          </div>
         </Link>
       </div>
       <Image
