@@ -39,7 +39,28 @@ export default function OutputTableSer(props: OutputTableSerProps) {
 
     try {
       document.execCommand("copy");
-      alert("Text has been copied to the clipboard");
+      // alert("Text has been copied to the clipboard");
+    } catch (err) {
+      console.error("Unable to copy text to the clipboard", err);
+    } finally {
+      // Remove the textarea from the DOM
+      document.body.removeChild(textarea);
+    }
+  };
+
+  const handleCopyResId = () => {
+    // Create a textarea element to hold the value
+    const textarea = document.createElement("textarea");
+    textarea.value = id;
+
+    // Append the textarea to the DOM
+    document.body.appendChild(textarea);
+
+    // Select the text in the textarea
+    textarea.select();
+
+    try {
+      document.execCommand("copy");
     } catch (err) {
       console.error("Unable to copy text to the clipboard", err);
     } finally {
@@ -51,8 +72,11 @@ export default function OutputTableSer(props: OutputTableSerProps) {
   return (
     <div className="grid grid-cols-7 border-[1px] border-[#D5D5D5] rounded-[10px] items-center">
       <div className="pl-[20px] pr-[20px] py-[20px]">
-        <p className="text-black font-poppins text-[12px] font-normal leading-[170%]">
+        <p className="flex flex-row items-center gap-4 text-black font-poppins text-[12px] font-normal leading-[170%]">
           {id}
+          <button onClick={handleCopyResId}>
+            <Copy className="text-info-main" />
+          </button>
         </p>
       </div>
       <div className="pl-[20px] pr-[20px] py-[20px]">

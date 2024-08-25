@@ -32,7 +32,7 @@ export default function Hero() {
         everything can be fixed.
       </h1>
       <p className="text-black font-poppins text-[16px] font-normal leading-[170%] text-center">
-        Quick solution to your technology problems, find your way at Bengkel IT!
+        Quick solution to your technology problems, find your way at Fixable!
       </p>
       <div className="flex flex-row items-center gap-[16px]">
         <button

@@ -217,7 +217,7 @@ export default function Appointment() {
                     <ButtonDay
                       day="Tuesday"
                       type="button"
-                      active={selectedDays.includes("Tueday")}
+                      active={selectedDays.includes("Tuesday")}
                       onClick={() => handleDaySelect("Tuesday")}
                     />
                     <ButtonDay

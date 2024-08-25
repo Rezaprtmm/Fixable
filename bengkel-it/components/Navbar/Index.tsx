@@ -107,7 +107,7 @@ export default function Navbar() {
         {isLogin ? (
           <div className="flex flex-col relative">
             <button
-              className="bg-blue-main px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
+              className="bg-gradient-to-r from-black to-blue-main bg-transparent px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
               onClick={handleOpen}
             >
               {username}

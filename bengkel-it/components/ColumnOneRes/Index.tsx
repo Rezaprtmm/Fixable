@@ -1,4 +1,5 @@
 import Arrow from "@/public/svgs/arrow";
+import Link from "next/link";
 
 interface ColumnOneResProps {
   title: string;
@@ -27,12 +28,15 @@ export default function ColumnOneRes(props: ColumnOneResProps) {
             If you don&#39;t understand the problem you are experiencing, you
             can consult first with our team.
           </p>
-          <div className="flex flex-row items-center gap-[8px]">
+          <Link
+            href={"/#consultation"}
+            className="flex flex-row items-center gap-[8px]"
+          >
             <p className="text-blue-darker font-poppins text-[14px] font-bold leading-[170%]">
               Consultation now
             </p>
             <Arrow className="text-blue-darker rotate-45 w-[24px]" />
-          </div>
+          </Link>
         </div>
       </div>
     </div>

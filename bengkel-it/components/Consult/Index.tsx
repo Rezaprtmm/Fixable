@@ -2,6 +2,7 @@ import Gmail from "@/public/svgs/gmail";
 import Telegram from "@/public/svgs/telegram";
 import WhatsApp from "@/public/svgs/whatsapp";
 import React from "react";
+import { Icon } from "@iconify/react";
 
 export default function Consult() {
   return (
@@ -15,19 +16,19 @@ export default function Consult() {
         </p>
         <div className="w-full flex flex-row items-center justify-center mt-[60px] gap-[16px]">
           <div className="bg-success-main px-[24px] py-[12px] flex flex-row gap-[10px] rounded-[4px]">
-            <WhatsApp />
+            <Icon icon={"logos:whatsapp-icon"} className="w-6 h-6" />
             <p className="text-white font-poppins text-[14px] font-normal leading-[170%]">
               WhatsApp
             </p>
           </div>
           <div className="bg-white px-[24px] py-[12px] flex flex-row gap-[10px] rounded-[4px]">
-            <Gmail />
+            <Icon icon={"logos:google-gmail"} className="w-6 h-6" />
             <p className="text-black font-poppins text-[14px] font-normal leading-[170%]">
               Gmail
             </p>
           </div>
-          <div className="bg-[#29AAED] px-[24px] py-[12px] flex flex-row gap-[10px] rounded-[4px]">
-            <Telegram />
+          <div className="bg-[#29AAED] px-[24px] py-[12px] flex flex-row items-center gap-[10px] rounded-[4px]">
+            <Icon icon={"logos:telegram"} className="w-6 h-6" />
             <p className="text-white font-poppins text-[14px] font-normal leading-[170%]">
               Telegram
             </p>
