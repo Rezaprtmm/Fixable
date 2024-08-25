@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 const { OAuth2Client } = require("google-auth-library");
 const { MongoClient } = require("mongodb");
+// const midtransClient = require('midtrans-client');
 
 // URL Koneksi MongoDB
 const uri = "mongodb://localhost:27017"; // Ubah sesuai dengan URL MongoDB Anda
@@ -19,12 +20,39 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
-async function insertSignUp(fullName, userName, email, nim, password) {
+// let snap = new midtransClient.Snap({
+//   // Set to true if you want Production Environment (accept real transaction).
+//   isProduction: false,
+//   serverKey: 'SB-Mid-server-dyE8earWIMv4SsFDucSIbS69'
+// });
+
+// let parameter = {
+//   "transaction_details": {
+//     "order_id": "YOUR-ORDERID-123357",
+//     "gross_amount": 10000
+//   },
+//   "credit_card": {
+//     "secure": true
+//   },
+//   "customer_details": {
+//     "first_name": "budi",
+//     "last_name": "pratama",
+//     "email": "budi.pra@example.com",
+//     "phone": "08111222333"
+//   }
+// };
+
+// snap.createTransaction(parameter)
+//   .then((transaction) => {
+//     // transaction token
+//     let transactionToken = transaction.token;
+//     console.log('transactionToken:', transactionToken);
+//   });
+
+async function insertSignUp(fullName, userName, email, password) {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(accountCollection);
-  // const databasesList = await client.db().admin().listDatabases();
-  // const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
   const collections = await db.listCollections().toArray();
   const collectionExists = collections.some(
     (collection) => collection.name === accountCollection
@@ -34,7 +62,7 @@ async function insertSignUp(fullName, userName, email, nim, password) {
     await db.createCollection(accountCollection);
   }
 
-  const idCheck = await collection.find({ _id: nim }).toArray();
+  const userCollection = await collection.find().toArray();
   const unameCheck = await collection.find({ username: userName }).toArray();
   const emailCheck = await collection.find({ email: email }).toArray();
   const currentTime = Date.now();
@@ -43,11 +71,13 @@ async function insertSignUp(fullName, userName, email, nim, password) {
   const month = currentDate.getMonth() + 1;
   const day = currentDate.getDate();
   const DATE = `${day}/${month}/${year}`;
+  const randNumGen = Math.floor(Math.random() * 100) + 1;
+  const idGenerate = `${day}${month}${year}${randNumGen}${userCollection.length + 1}`;
 
-  if (idCheck.length == 0 && emailCheck == 0 && unameCheck == 0) {
+  if (emailCheck == 0 && unameCheck == 0) {
     const dataToInsert = [
       {
-        _id: nim,
+        _id: idGenerate,
         fullName: fullName,
         username: userName,
         email: email,
@@ -59,8 +89,6 @@ async function insertSignUp(fullName, userName, email, nim, password) {
     ];
     const result = await collection.insertMany(dataToInsert);
     return true;
-  } else if (idCheck.length != 0) {
-    return "nim-exist";
   } else {
     return "data-exist";
   }
@@ -70,8 +98,6 @@ async function initializeData() {
   await client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(priceCollection);
-  // const databasesList = await client.db().admin().listDatabases();
-  // const databaseExists = databasesList.databases.some((db) => db.name === databaseName);
   const collections = await db.listCollections().toArray();
   const collectionExists = collections.some(
     (collection) => collection.name === priceCollection
@@ -375,7 +401,7 @@ async function cancelPurgeForm(username) {
 }
 
 async function reservation(
-  nim,
+  userId,
   fullname,
   email,
   major,
@@ -391,7 +417,7 @@ async function reservation(
     (collection) => collection.name === reserveCollection
   );
   const totalForm = await collection.find({}).toArray();
-  const formId = `${nim}0${totalForm.length + 1}`;
+  const formId = `${userId}0${totalForm.length + 1}`;
 
   if (!collectionExists) {
     await db.createCollection(reserveCollection);
@@ -730,10 +756,10 @@ app.use(
 );
 
 app.post("/signup", async (req, res) => {
-  const { fullName, userName, email, nim, password } = req.body;
+  const { fullName, userName, email, password } = req.body;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (emailPattern.test(email)) {
-    const insert = await insertSignUp(fullName, userName, email, nim, password);
+    const insert = await insertSignUp(fullName, userName, email, password);
     res.json(insert);
   } else {
     res.send(false);
@@ -805,7 +831,7 @@ app.post("/purgereview", async (req, res) => {
 });
 
 app.post("/reserve", async (req, res) => {
-  const { fullname, email, major, phoneNumber, nim, username, formId } =
+  const { fullname, email, major, phoneNumber, userId, username, formId } =
     req.body;
 
   if (formId == "") {
@@ -818,7 +844,7 @@ app.post("/reserve", async (req, res) => {
     }
 
     let inputReserve = await reservation(
-      nim,
+      userId,
       fullname,
       email,
       major,
@@ -828,7 +854,7 @@ app.post("/reserve", async (req, res) => {
     res.send(inputReserve);
   } else {
     let inputReserve = await reservation(
-      nim,
+      userId,
       fullname,
       email,
       major,
@@ -948,24 +974,6 @@ app.post("/signout", async (req, res) => {
   let logout = await logOut();
   res.send(logout);
 });
-
-// app.post("/data", async (req, res) => {
-//   const data = req.body;
-
-//   const client = new OAuth2Client();
-//   async function verify() {
-//     const ticket = await client.verifyIdToken({
-//       idToken: data.idToken,
-//       audience: "43375088554-nsvi4j6fuv7l0tpfngmj3ggshgbmbmc6.apps.googleusercontent.com",
-//     });
-//     const payload = ticket.getPayload();
-//     const userid = payload["sub"];
-//     const domain = payload["paramadina.ac.id"];
-//     MongoDBTask("write", "google", payload.email, payload.name);
-//     res.json(payload.email);
-//   }
-//   verify().catch(console.error);
-// });
 
 app.listen(port, () => {
   console.log(`App running on port http://localhost:${port}`);
