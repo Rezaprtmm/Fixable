@@ -9,7 +9,7 @@ interface CardTestimonialsProps {
 export default function CardTestimonials(props: CardTestimonialsProps) {
   const { username, message } = props;
   return (
-    <div className="border-[1px] border-blue-lighter flex flex-col w-1/3 h-[300px] rounded-[30px] p-[20px]">
+    <div className="border-[1px] border-blue-lighter flex flex-col h-[300px] rounded-[30px] p-[20px]">
       <div className="flex flex-row items-center gap-[16px]">
         <Image
           src={"/images/users.png"}

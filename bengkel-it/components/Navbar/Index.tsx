@@ -68,76 +68,76 @@ export default function Navbar() {
   };
 
   return (
-    <div className="bg-white w-full">
-      <div className="px-[100px] mx-auto flex flex-row items-center justify-between py-[28px]">
+    <div className="w-full px-[100px] mx-auto flex flex-row items-center justify-between py-[28px]">
+      <div className="w-full max-w-[150px]">
         <Image
           src={"/images/Logo.svg"}
           alt="Logo"
           width={0}
           height={0}
           sizes="100%"
-          className="w-full max-w-[200px] h-12"
+          className="w-full h-12"
         />
-        <div className="flex flex-row items-center gap-[30px]">
-          <button
-            onClick={(e) => handleSubmit(e, "Reservation")}
-            className="text-black font-poppins text-[16px] font-normal leading-[170%]"
-          >
-            Reservation
-          </button>
-          <Link
-            href={"#services"}
-            className="text-black font-poppins text-[16px] font-normal leading-[170%]"
-          >
-            Services
-          </Link>
-          <Link
-            href={"#portofolio"}
-            className="text-black font-poppins text-[16px] font-normal leading-[170%]"
-          >
-            Portofolio
-          </Link>
-          <button
-            onClick={(e) => handleSubmit(e, "Dashboard")}
-            className="text-black font-poppins text-[16px] font-normal leading-[170%]"
-          >
-            Dashboard
-          </button>
-        </div>
-        {isLogin ? (
-          <div className="flex flex-col relative">
-            <button
-              className="bg-gradient-to-r from-black to-blue-main bg-transparent px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
-              onClick={handleOpen}
-            >
-              {username}
-            </button>
-            {isOpen && (
-              <div className="bg-white w-[220px] flex flex-col absolute top-[50px] z-10 px-[20px] right-0 border-[1px] border-[#D5D5D5] mt-[10px] rounded-[10px] divide-[#D5D5D5] divide-y-[1px]">
-                <Link
-                  href={"/profile"}
-                  className="text-black font-poppins text-[16px] font-normal leading-normal py-[20px]"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-black font-poppins text-[16px] text-start font-normal leading-normal py-[20px]"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            className="bg-gradient-to-r from-black to-blue-main px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
-            onClick={(e) => handleSubmit(e, "Login")}
-          >
-            Sign In
-          </button>
-        )}
       </div>
+      <div className="w-full flex flex-row items-center justify-center gap-[30px]">
+        <button
+          onClick={(e) => handleSubmit(e, "Reservation")}
+          className="text-black font-poppins text-[16px] font-normal leading-[170%]"
+        >
+          Reservation
+        </button>
+        <Link
+          href={"#services"}
+          className="text-black font-poppins text-[16px] font-normal leading-[170%]"
+        >
+          Services
+        </Link>
+        <Link
+          href={"#portofolio"}
+          className="text-black font-poppins text-[16px] font-normal leading-[170%]"
+        >
+          Portofolio
+        </Link>
+        <button
+          onClick={(e) => handleSubmit(e, "Dashboard")}
+          className="text-black font-poppins text-[16px] font-normal leading-[170%]"
+        >
+          Dashboard
+        </button>
+      </div>
+      {isLogin ? (
+        <div className="flex flex-col relative w-full max-w-[150px]">
+          <button
+            className="bg-gradient-to-r from-black to-blue-main bg-transparent px-[24px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
+            onClick={handleOpen}
+          >
+            {username}
+          </button>
+          {isOpen && (
+            <div className="bg-white w-[220px] flex flex-col absolute top-[50px] z-10 px-[20px] right-0 border-[1px] border-[#D5D5D5] mt-[10px] rounded-[10px] divide-[#D5D5D5] divide-y-[1px]">
+              <Link
+                href={"/profile"}
+                className="text-black font-poppins text-[16px] font-normal leading-normal py-[20px]"
+              >
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-black font-poppins text-[16px] text-start font-normal leading-normal py-[20px]"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <button
+          className="bg-gradient-to-r from-black to-blue-main w-full max-w-[150px] py-[12px] rounded-[26px] text-white font-poppins text-[16px] font-normal leading-[170%]"
+          onClick={(e) => handleSubmit(e, "Login")}
+        >
+          Sign In
+        </button>
+      )}
     </div>
   );
 }
