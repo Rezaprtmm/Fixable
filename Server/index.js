@@ -49,6 +49,21 @@ const client = new MongoClient(uri, {
 //     console.log('transactionToken:', transactionToken);
 //   });
 
+function idGenerator() {
+  let digits = '';
+  for (let i = 0; i < 4; i++) {
+    digits += Math.floor(Math.random() * 10);
+  }
+
+  let letters = '';
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let i = 0; i < 3; i++) {
+    letters += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+
+  return digits + letters;
+}
+
 async function insertSignUp(fullName, userName, email, password) {
   await client.connect();
   const db = client.db(databaseName);
@@ -71,13 +86,12 @@ async function insertSignUp(fullName, userName, email, password) {
   const month = currentDate.getMonth() + 1;
   const day = currentDate.getDate();
   const DATE = `${day}/${month}/${year}`;
-  const randNumGen = Math.floor(Math.random() * 100) + 1;
-  const idGenerate = `${day}${month}${year}${randNumGen}${userCollection.length + 1}`;
+  const newIdGenerate = `${idGenerator()}${userCollection.length + 1}`;
 
   if (emailCheck == 0 && unameCheck == 0) {
     const dataToInsert = [
       {
-        _id: idGenerate,
+        _id: newIdGenerate,
         fullName: fullName,
         username: userName,
         email: email,
